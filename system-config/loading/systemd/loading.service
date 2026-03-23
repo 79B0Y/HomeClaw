@@ -1,0 +1,21 @@
+[Unit]
+Description=LinknLink Loading Display Service (Text Mode)
+After=network-online.target
+Wants=network-online.target
+Before=getty@tty1.service
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/show-loading
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+# 环境变量配置
+Environment="TTY_DEVICE=/dev/tty1"
+Environment="REFRESH_INTERVAL=5"
+Environment="ENABLE_COLOR=true"
+
+[Install]
+WantedBy=multi-user.target

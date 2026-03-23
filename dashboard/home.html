@@ -1,0 +1,2051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HomeClaw – Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Noto+Sans+SC:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:       #0d0a0f;
+  --bg2:      #131018;
+  --bg3:      #1a1622;
+  --border:   rgba(255,255,255,0.07);
+  --border2:  rgba(255,255,255,0.12);
+  --red:      #e8352a;
+  --red-dim:  rgba(232,53,42,0.15);
+  --cyan:     #29d9c2;
+  --cyan-dim: rgba(41,217,194,0.12);
+  --amber:    #f5a623;
+  --green:    #3ddc84;
+  --blue:     #4a9eff;
+  --purple:   #a855f7;
+  --text:     #edeaf5;
+  --muted:    rgba(237,234,245,0.4);
+  --muted2:   rgba(237,234,245,0.22);
+  --sidebar:  220px;
+}
+
+html, body { height: 100%; overflow: hidden; }
+
+body {
+  font-family: 'Nunito', 'Noto Sans SC', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+}
+
+/* ═══════════ SIDEBAR ═══════════ */
+.sidebar {
+  width: var(--sidebar);
+  min-height: 100vh;
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 20;
+}
+
+.sidebar-brand {
+  display: flex; align-items: center; gap: 0.65rem;
+  padding: 1.4rem 1.4rem 1rem;
+}
+
+.brand-icon {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, #38b6ff, #0060dd);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 16px rgba(0,130,255,0.4);
+  flex-shrink: 0;
+}
+
+.brand-text { line-height: 1.1; }
+.brand-name { font-size: 1rem; font-weight: 900; color: #fff; letter-spacing: 0.01em; }
+.brand-sub  { font-size: 0.6rem; font-weight: 700; color: var(--cyan); letter-spacing: 0.14em; text-transform: uppercase; }
+
+.sidebar-divider { height: 1px; background: var(--border); margin: 0.5rem 1.2rem; }
+
+.nav-section-label {
+  font-size: 0.58rem; font-weight: 800;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--muted2); padding: 0.85rem 1.4rem 0.35rem;
+}
+
+.nav-item {
+  display: flex; align-items: center; gap: 0.7rem;
+  padding: 0.65rem 1.2rem;
+  margin: 0.1rem 0.6rem;
+  border-radius: 10px;
+  font-size: 0.88rem; font-weight: 700;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all .2s;
+  position: relative;
+  text-decoration: none;
+}
+
+.nav-item:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+
+.nav-item.active {
+  background: rgba(232,53,42,0.12);
+  color: #fff;
+}
+
+.nav-item.active::before {
+  content: '';
+  position: absolute; left: -0.6rem; top: 20%; bottom: 20%;
+  width: 3px; background: var(--red);
+  border-radius: 0 3px 3px 0;
+}
+
+.nav-icon { width: 18px; height: 18px; flex-shrink: 0; opacity: 0.8; }
+.nav-item.active .nav-icon { opacity: 1; }
+
+.nav-badge {
+  margin-left: auto;
+  background: var(--red);
+  color: #fff; font-size: 0.6rem; font-weight: 800;
+  padding: 0.1rem 0.4rem; border-radius: 100px;
+  min-width: 18px; text-align: center;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 1rem 1rem 1.2rem;
+}
+
+.user-card {
+  display: flex; align-items: center; gap: 0.65rem;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0.7rem 0.85rem;
+  cursor: pointer;
+  transition: background .2s;
+}
+.user-card:hover { background: rgba(255,255,255,0.07); }
+
+.user-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: linear-gradient(135deg, #f55040, #9e1a10);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.8rem; font-weight: 900; color: #fff;
+  flex-shrink: 0;
+}
+
+.user-info { overflow: hidden; }
+.user-name  { font-size: 0.82rem; font-weight: 800; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-tier  { font-size: 0.62rem; font-weight: 700; color: var(--cyan); letter-spacing: 0.06em; }
+
+/* ═══════════ MAIN ═══════════ */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Top bar */
+.topbar {
+  display: flex; align-items: center;
+  padding: 0 2rem;
+  height: 64px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(13,10,15,0.85);
+  backdrop-filter: blur(12px);
+  flex-shrink: 0;
+  gap: 1rem;
+}
+
+.topbar-title { font-size: 1rem; font-weight: 800; color: var(--text); }
+
+.topbar-right { margin-left: auto; display: flex; align-items: center; gap: 0.75rem; }
+
+.icon-btn {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--muted);
+  transition: all .2s; position: relative;
+}
+.icon-btn:hover { background: rgba(255,255,255,0.09); color: var(--text); border-color: var(--border2); }
+
+.notif-dot {
+  position: absolute; top: 6px; right: 6px;
+  width: 7px; height: 7px;
+  background: var(--cyan); border-radius: 50%;
+  border: 1.5px solid var(--bg);
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+@keyframes pulse-dot {
+  0%,100% { box-shadow: 0 0 0 0 rgba(41,217,194,0.5); }
+  50%      { box-shadow: 0 0 0 4px rgba(41,217,194,0); }
+}
+
+.ai-badge {
+  display: flex; align-items: center; gap: 0.4rem;
+  background: rgba(41,217,194,0.1);
+  border: 1px solid rgba(41,217,194,0.25);
+  border-radius: 100px;
+  padding: 0.3rem 0.8rem;
+  font-size: 0.7rem; font-weight: 800;
+  color: var(--cyan); letter-spacing: 0.07em;
+}
+
+.ai-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--cyan);
+  animation: pulse-dot 1.6s ease-in-out infinite;
+}
+
+/* ═══════════ CONTENT ═══════════ */
+.content {
+  flex: 1; overflow-y: auto;
+  padding: 2rem 2rem 2rem;
+  scroll-behavior: smooth;
+}
+
+.content::-webkit-scrollbar { width: 4px; }
+.content::-webkit-scrollbar-track { background: transparent; }
+.content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+/* Section header */
+.section-eyebrow {
+  font-size: 0.6rem; font-weight: 800;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--red); margin-bottom: 0.3rem;
+}
+
+.section-title {
+  font-size: 1.6rem; font-weight: 900;
+  color: var(--text); margin-bottom: 0.15rem;
+  letter-spacing: -0.01em;
+}
+
+.section-header {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+/* ── STATS ROW ── */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.8rem;
+}
+
+.stat-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.2rem 1.4rem;
+  position: relative; overflow: hidden;
+  animation: fadeUp 0.5s ease both;
+  transition: border-color .2s, transform .2s;
+}
+.stat-card:hover { border-color: var(--border2); transform: translateY(-1px); }
+.stat-card:nth-child(1) { animation-delay: 0s; }
+.stat-card:nth-child(2) { animation-delay: 0.06s; }
+.stat-card:nth-child(3) { animation-delay: 0.12s; }
+.stat-card:nth-child(4) { animation-delay: 0.18s; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.stat-glow {
+  position: absolute; right: -20px; top: -20px;
+  width: 90px; height: 90px; border-radius: 50%;
+  opacity: 0.12; pointer-events: none;
+}
+
+.stat-icon-wrap {
+  width: 38px; height: 38px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.stat-val {
+  font-size: 1.7rem; font-weight: 900;
+  color: var(--text); line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.stat-label {
+  font-size: 0.72rem; font-weight: 700;
+  color: var(--muted); margin-top: 0.25rem;
+}
+
+.stat-change {
+  margin-top: 0.6rem;
+  font-size: 0.68rem; font-weight: 800;
+  display: flex; align-items: center; gap: 0.25rem;
+}
+
+/* ── SERVICES GRID ── */
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.8rem;
+}
+
+.service-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 1.4rem;
+  position: relative; overflow: hidden;
+  animation: fadeUp 0.5s ease both;
+  transition: border-color .25s, transform .2s, box-shadow .25s;
+}
+
+.service-card:hover {
+  border-color: var(--border2);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+}
+
+.service-card:nth-child(1) { animation-delay: 0.1s; }
+.service-card:nth-child(2) { animation-delay: 0.16s; }
+.service-card:nth-child(3) { animation-delay: 0.22s; }
+.service-card:nth-child(4) { animation-delay: 0.28s; }
+
+.service-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.service-icon {
+  width: 48px; height: 48px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem; flex-shrink: 0;
+}
+
+.service-status {
+  display: flex; align-items: center; gap: 0.35rem;
+  background: rgba(61,220,132,0.1);
+  border: 1px solid rgba(61,220,132,0.22);
+  border-radius: 100px;
+  padding: 0.22rem 0.65rem;
+  font-size: 0.62rem; font-weight: 800;
+  color: var(--green); letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.service-status.stopped {
+  background: rgba(232,53,42,0.1);
+  border-color: rgba(232,53,42,0.22);
+  color: var(--red);
+}
+
+.status-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--green);
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+.status-dot.stopped { background: var(--red); animation: none; }
+
+.service-name {
+  font-size: 1rem; font-weight: 900;
+  color: var(--text); margin-bottom: 0.25rem;
+}
+
+.service-meta {
+  display: flex; align-items: center; gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.service-ver {
+  font-size: 0.65rem; font-weight: 700;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 0.1rem 0.45rem;
+  color: var(--muted);
+}
+
+.service-desc {
+  font-size: 0.78rem; color: var(--muted);
+  font-weight: 500; line-height: 1.4;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* mini spark line */
+.spark {
+  height: 32px; margin: 0.8rem 0;
+  position: relative;
+}
+
+.spark svg { width: 100%; height: 100%; }
+
+.service-actions {
+  display: flex; gap: 0.5rem; margin-top: 0.5rem;
+}
+
+.btn-stop {
+  padding: 0.38rem 0.75rem;
+  background: rgba(232,53,42,0.12);
+  border: 1px solid rgba(232,53,42,0.25);
+  border-radius: 8px;
+  color: var(--red); font-family: inherit;
+  font-size: 0.7rem; font-weight: 800;
+  letter-spacing: 0.06em; cursor: pointer;
+  transition: all .2s;
+}
+.btn-stop:hover { background: rgba(232,53,42,0.22); border-color: rgba(232,53,42,0.4); }
+
+.btn-restart {
+  padding: 0.38rem 0.75rem;
+  background: rgba(245,166,35,0.1);
+  border: 1px solid rgba(245,166,35,0.22);
+  border-radius: 8px;
+  color: var(--amber); font-family: inherit;
+  font-size: 0.7rem; font-weight: 800;
+  letter-spacing: 0.06em; cursor: pointer;
+  transition: all .2s;
+}
+.btn-restart:hover { background: rgba(245,166,35,0.2); }
+
+.btn-open {
+  padding: 0.38rem 0.75rem;
+  background: rgba(74,158,255,0.1);
+  border: 1px solid rgba(74,158,255,0.22);
+  border-radius: 8px;
+  color: var(--blue); font-family: inherit;
+  font-size: 0.7rem; font-weight: 800;
+  letter-spacing: 0.06em; cursor: pointer;
+  transition: all .2s;
+  margin-left: auto;
+}
+.btn-open:hover { background: rgba(74,158,255,0.2); }
+
+/* Single install/uninstall toggle button */
+.btn-pkg {
+  padding: 0.38rem 0.75rem;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.7rem; font-weight: 800;
+  letter-spacing: 0.06em; cursor: pointer;
+  transition: all .2s;
+}
+.btn-pkg.install {
+  background: rgba(61,220,132,0.1);
+  border: 1px solid rgba(61,220,132,0.22);
+  color: var(--green);
+}
+.btn-pkg.install:hover { background: rgba(61,220,132,0.2); }
+.btn-pkg.uninstall {
+  background: rgba(100,100,120,0.12);
+  border: 1px solid rgba(100,100,120,0.25);
+  color: rgba(237,234,245,0.5);
+}
+.btn-pkg.uninstall:hover { background: rgba(232,53,42,0.12); border-color: rgba(232,53,42,0.25); color: var(--red); }
+
+.service-actions { flex-wrap: wrap; }
+
+.btn-upgrade-icon {
+  width: 28px; height: 28px;
+  background: rgba(168,85,247,0.12);
+  border: 1px solid rgba(168,85,247,0.28);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--purple);
+  transition: all .2s; flex-shrink: 0;
+  position: relative;
+}
+.btn-upgrade-icon:hover {
+  background: rgba(168,85,247,0.25);
+  border-color: rgba(168,85,247,0.5);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(168,85,247,0.25);
+}
+.btn-upgrade-icon::after {
+  content: 'Update available';
+  position: absolute; bottom: calc(100% + 6px); left: 50%;
+  transform: translateX(-50%);
+  background: rgba(20,14,28,0.95);
+  border: 1px solid rgba(168,85,247,0.3);
+  border-radius: 6px;
+  padding: 0.25rem 0.55rem;
+  font-size: 0.62rem; font-weight: 700;
+  color: var(--purple); white-space: nowrap;
+  opacity: 0; pointer-events: none;
+  transition: opacity .18s;
+}
+.btn-upgrade-icon:hover::after { opacity: 1; }
+
+/* ── BOTTOM ROW ── */
+.bottom-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.panel {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 1.4rem;
+  animation: fadeUp 0.5s 0.3s ease both;
+}
+
+.panel-title {
+  font-size: 0.82rem; font-weight: 800;
+  color: var(--text); margin-bottom: 1rem;
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.panel-link {
+  font-size: 0.68rem; font-weight: 700;
+  color: var(--cyan); cursor: pointer;
+  letter-spacing: 0.04em;
+}
+
+/* activity feed */
+.activity-item {
+  display: flex; align-items: flex-start; gap: 0.75rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.activity-item:last-child { border-bottom: none; padding-bottom: 0; }
+
+.activity-icon {
+  width: 28px; height: 28px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.8rem; flex-shrink: 0; margin-top: 0.05rem;
+}
+
+.activity-text {
+  flex: 1; min-width: 0;
+}
+
+.activity-main {
+  font-size: 0.78rem; font-weight: 700;
+  color: var(--text); line-height: 1.3;
+}
+
+.activity-time {
+  font-size: 0.65rem; color: var(--muted2);
+  font-weight: 600; margin-top: 0.15rem;
+}
+
+/* usage donut-style bars */
+.usage-item {
+  margin-bottom: 1rem;
+}
+.usage-item:last-child { margin-bottom: 0; }
+
+.usage-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 0.4rem;
+}
+
+.usage-label {
+  font-size: 0.75rem; font-weight: 700; color: var(--text);
+  display: flex; align-items: center; gap: 0.4rem;
+}
+
+.usage-val {
+  font-size: 0.72rem; font-weight: 800; color: var(--muted);
+}
+
+.usage-bar {
+  height: 6px; background: rgba(255,255,255,0.07);
+  border-radius: 100px; overflow: hidden;
+}
+
+.usage-fill {
+  height: 100%; border-radius: 100px;
+  transition: width 1s cubic-bezier(.22,.9,.36,1);
+}
+
+/* AI insight card */
+.insight-card {
+  background: linear-gradient(135deg, rgba(41,217,194,0.06), rgba(74,158,255,0.04));
+  border: 1px solid rgba(41,217,194,0.15);
+  border-radius: 14px;
+  padding: 1rem 1.2rem;
+  margin-bottom: 1rem;
+  display: flex; gap: 0.8rem; align-items: flex-start;
+}
+.insight-card:last-child { margin-bottom: 0; }
+
+.insight-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 0.05rem; }
+
+.insight-text {
+  font-size: 0.78rem; color: rgba(237,234,245,0.75);
+  line-height: 1.55; font-weight: 500;
+}
+
+.insight-text strong { color: var(--cyan); font-weight: 800; }
+
+/* ── LANG SWITCHER ── */
+.lang-switcher {
+  display: flex; align-items: center;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 100px; padding: 0.22rem 0.3rem; gap: 0.06rem;
+}
+.lang-btn {
+  padding: 0.24rem 0.6rem; border-radius: 100px;
+  font-size: 0.68rem; font-weight: 800; letter-spacing: 0.05em;
+  color: var(--muted); cursor: pointer; transition: all .2s;
+  user-select: none; border: none; background: none; font-family: inherit;
+}
+.lang-btn.active { background: rgba(41,217,194,0.18); color: var(--cyan); }
+.lang-btn:hover:not(.active) { color: #fff; }
+
+/* lobster mascot watermark */
+.mascot-watermark {
+  position: fixed; right: -20px; bottom: -20px;
+  opacity: 0.035; pointer-events: none; z-index: 0;
+  transform: rotate(15deg);
+}
+
+/* ═══════════ SYSTEM CONFIG MODAL ═══════════ */
+.syscfg-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(8,6,12,0.82);
+  backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.2s;
+}
+.syscfg-overlay.open { opacity: 1; pointer-events: all; }
+
+.syscfg-modal {
+  width: 820px; max-width: calc(100vw - 2rem);
+  max-height: calc(100vh - 4rem);
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: 18px;
+  display: flex; flex-direction: column;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.6);
+  overflow: hidden;
+  transform: translateY(16px);
+  transition: transform 0.22s cubic-bezier(.22,.68,0,1.2);
+}
+.syscfg-overlay.open .syscfg-modal { transform: translateY(0); }
+
+.syscfg-head {
+  display: flex; align-items: center; gap: 0.7rem;
+  padding: 1.1rem 1.4rem;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.syscfg-head-icon {
+  width: 32px; height: 32px;
+  background: rgba(41,217,194,0.15);
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem;
+}
+.syscfg-head-title { font-size: 0.95rem; font-weight: 800; color: var(--text); }
+.syscfg-head-sub   { font-size: 0.7rem; color: var(--muted); }
+.syscfg-head-info  { flex: 1; }
+.syscfg-close {
+  width: 28px; height: 28px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  color: var(--muted); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; line-height: 1;
+  transition: background 0.15s, color 0.15s;
+}
+.syscfg-close:hover { background: var(--red-dim); color: var(--red); border-color: var(--red); }
+
+.syscfg-body {
+  display: flex; flex: 1; overflow: hidden;
+}
+
+/* left sidebar */
+.syscfg-sidebar {
+  width: 185px; flex-shrink: 0;
+  padding: 1rem 0.75rem;
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  display: flex; flex-direction: column; gap: 0.2rem;
+}
+.syscfg-group-label {
+  font-size: 0.58rem; font-weight: 800; letter-spacing: 0.13em;
+  text-transform: uppercase; color: var(--muted2);
+  padding: 0.6rem 0.5rem 0.3rem;
+}
+.syscfg-btn {
+  width: 100%;
+  padding: 0.48rem 0.75rem;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: var(--muted);
+  font-family: inherit; font-size: 0.78rem; font-weight: 700;
+  cursor: pointer; text-align: left;
+  display: flex; align-items: center; gap: 0.5rem;
+  transition: background 0.13s, color 0.13s, border-color 0.13s;
+  white-space: nowrap;
+}
+.syscfg-btn:hover { background: rgba(255,255,255,0.05); color: var(--text); border-color: var(--border); }
+.syscfg-btn.active { background: rgba(41,217,194,0.1); color: var(--cyan); border-color: rgba(41,217,194,0.25); }
+.syscfg-btn.danger:hover { background: var(--red-dim); color: var(--red); border-color: rgba(232,53,42,0.3); }
+.syscfg-btn.danger.active { background: var(--red-dim); color: var(--red); border-color: rgba(232,53,42,0.3); }
+.syscfg-btn-icon { font-size: 0.85rem; flex-shrink: 0; }
+.syscfg-btn-badge {
+  margin-left: auto;
+  font-size: 0.6rem; font-weight: 800;
+  padding: 0.1rem 0.4rem;
+  background: rgba(41,217,194,0.15);
+  color: var(--cyan);
+  border-radius: 5px;
+}
+.syscfg-btn.danger .syscfg-btn-badge { background: var(--red-dim); color: var(--red); }
+
+/* right result panel */
+.syscfg-panel {
+  flex: 1; display: flex; flex-direction: column; overflow: hidden;
+}
+.syscfg-panel-head {
+  padding: 0.75rem 1.2rem;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 0.6rem;
+  flex-shrink: 0;
+}
+.syscfg-panel-name { font-size: 0.82rem; font-weight: 800; color: var(--text); }
+.syscfg-panel-method {
+  font-size: 0.6rem; font-weight: 800; letter-spacing: 0.06em;
+  padding: 0.15rem 0.45rem;
+  border-radius: 5px;
+  background: rgba(41,217,194,0.12); color: var(--cyan);
+}
+.syscfg-panel-method.post { background: rgba(168,85,247,0.12); color: var(--purple); }
+.syscfg-panel-url { font-size: 0.68rem; color: var(--muted); font-family: monospace; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.syscfg-run-btn {
+  padding: 0.32rem 0.9rem;
+  background: var(--cyan-dim); border: 1px solid rgba(41,217,194,0.3);
+  border-radius: 7px; color: var(--cyan);
+  font-family: inherit; font-size: 0.72rem; font-weight: 800;
+  cursor: pointer; white-space: nowrap;
+  transition: background 0.13s;
+}
+.syscfg-run-btn:hover { background: rgba(41,217,194,0.2); }
+.syscfg-run-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.syscfg-run-btn.danger { background: var(--red-dim); border-color: rgba(232,53,42,0.3); color: var(--red); }
+.syscfg-run-btn.danger:hover { background: rgba(232,53,42,0.22); }
+
+.syscfg-result {
+  flex: 1; overflow-y: auto;
+  padding: 1rem 1.2rem;
+  font-family: 'Courier New', monospace;
+  font-size: 0.72rem;
+  line-height: 1.6;
+}
+.syscfg-placeholder {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  height: 100%; gap: 0.5rem; color: var(--muted2);
+}
+.syscfg-placeholder svg { opacity: 0.3; }
+
+.syscfg-loading {
+  display: flex; align-items: center; gap: 0.5rem;
+  color: var(--cyan); font-size: 0.75rem; font-weight: 700;
+  padding: 0.5rem 0;
+}
+.syscfg-spin {
+  width: 14px; height: 14px;
+  border: 2px solid rgba(41,217,194,0.2);
+  border-top-color: var(--cyan);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.syscfg-tag-success { color: var(--green); font-weight: 700; }
+.syscfg-tag-failed  { color: var(--red);   font-weight: 700; }
+.syscfg-tag-running { color: var(--amber); font-weight: 700; }
+.syscfg-tag-info    { color: var(--cyan);  font-weight: 700; }
+.syscfg-log-line    { color: var(--text);  white-space: pre-wrap; word-break: break-all; }
+.syscfg-log-ts      { color: var(--muted2); }
+
+.syscfg-task-bar {
+  margin: 0.6rem 0 0.2rem;
+  padding: 0.45rem 0.7rem;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.7rem;
+  display: flex; gap: 1rem; align-items: center;
+}
+.syscfg-json-key   { color: var(--blue); }
+.syscfg-json-str   { color: var(--green); }
+.syscfg-json-num   { color: var(--amber); }
+.syscfg-json-bool  { color: var(--purple); }
+.syscfg-json-null  { color: var(--muted); }
+</style>
+</head>
+<body>
+
+<!-- ═══ SIDEBAR ═══ -->
+<div class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-icon">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+        <path d="M11 3L18 7.5V14.5L11 19L4 14.5V7.5L11 3Z" stroke="white" stroke-width="1.5"/>
+        <circle cx="11" cy="11" r="2.5" fill="white"/>
+      </svg>
+    </div>
+    <div class="brand-text">
+      <div class="brand-name">HomeClaw</div>
+      <div class="brand-sub">Smart Intelligence</div>
+    </div>
+  </div>
+
+  <div class="sidebar-divider"></div>
+
+  <div class="nav-section-label" data-i18n="nav_main">Main</div>
+
+  <a class="nav-item active" href="#">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+      <polyline points="9 22 9 12 15 12 15 22"/>
+    </svg>
+    <span data-i18n="nav_home">Home</span>
+  </a>
+
+  <a class="nav-item" href="usage.html">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+    </svg>
+    <span data-i18n="nav_usage">Usage</span>
+    <span class="nav-badge">3</span>
+  </a>
+
+  <a class="nav-item" href="#">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+    </svg>
+    <span data-i18n="nav_services">Services</span>
+  </a>
+
+  <a class="nav-item" href="#">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+    </svg>
+    <span data-i18n="nav_automations">Automations</span>
+  </a>
+
+  <div class="nav-section-label" data-i18n="nav_account">Account</div>
+
+  <a class="nav-item" href="topup.html">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <path d="M20 12V22H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>
+    </svg>
+    <span data-i18n="nav_topup">Top Up</span>
+  </a>
+
+  <a class="nav-item" href="billing.html">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>
+    </svg>
+    <span data-i18n="nav_billing">Billing</span>
+  </a>
+
+  <a class="nav-item" href="#">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>
+    </svg>
+    <span data-i18n="nav_settings">Settings</span>
+  </a>
+
+
+  <div style="margin-top: auto;"></div>
+  <a class="nav-item" href="#">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+    <span data-i18n="nav_docs">Docs</span>
+  </a>
+  <a class="nav-item" href="#">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    <span data-i18n="nav_faq">FAQ</span>
+  </a>
+  <a class="nav-item" href="#">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+    <span data-i18n="nav_pricing">Pricing</span>
+  </a>
+  <a class="nav-item" href="#">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+    <span data-i18n="nav_integration">Integration</span>
+  </a>
+  <a class="nav-item" href="#">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    <span data-i18n="nav_contact">Contact us</span>
+  </a>
+
+  <div class="sidebar-footer" style="margin-top: 0;">
+
+    <div class="user-card">
+      <div class="user-avatar">A</div>
+      <div class="user-info">
+        <div class="user-name">Alex Chen</div>
+        <div class="user-tier" data-i18n="user_tier">Premium Tier</div>
+      </div>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="color:var(--muted2);flex-shrink:0">
+        <polyline points="9 18 15 12 9 6"/>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MAIN ═══ -->
+<div class="main">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <div>
+      <div style="font-size:0.58rem;font-weight:800;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted2);margin-bottom:0.1rem" data-i18n="eyebrow">OPERATIONAL OVERVIEW</div>
+      <div class="topbar-title" data-i18n="page_title">Home Dashboard</div>
+    </div>
+    <div class="topbar-right">
+      <div class="ai-badge">
+        <div class="ai-dot"></div>
+        <span data-i18n="ai_badge">AI MANAGED: ACTIVE</span>
+      </div>
+      <div class="lang-switcher">
+        <button class="lang-btn active" data-lang="en">EN</button>
+        <button class="lang-btn" data-lang="zh">中文</button>
+        <button class="lang-btn" data-lang="ja">日本語</button>
+        <button class="lang-btn" data-lang="ko">한국어</button>
+      </div>
+      <div class="icon-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+        </svg>
+        <div class="notif-dot"></div>
+      </div>
+      <div class="icon-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M12 2v2M12 20v2M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M2 12h2M20 12h2"/>
+        </svg>
+      </div>
+      <div style="display:flex;align-items:center;gap:0.5rem;padding-left:0.5rem;border-left:1px solid var(--border)">
+        <div style="text-align:right">
+          <div style="font-size:0.78rem;font-weight:800;color:var(--text)">Alex Chen</div>
+          <div style="font-size:0.6rem;font-weight:700;color:var(--cyan);letter-spacing:0.06em" data-system-active>SYSTEM ACTIVE</div>
+        </div>
+        <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#f55040,#9e1a10);display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:900;color:#fff">A</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-glow" style="background:#3ddc84"></div>
+        <div class="stat-icon-wrap" style="background:rgba(61,220,132,0.12)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3ddc84" stroke-width="2" stroke-linecap="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+        </div>
+        <div class="stat-val" id="stat-services-val">4</div>
+        <div class="stat-label" data-i18n="stat_services">Services Running</div>
+        <div class="stat-change" style="color:var(--green)">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="18 15 12 9 6 15"/></svg>
+          <span data-i18n="stat_services_sub">All systems nominal</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-glow" style="background:#4a9eff"></div>
+        <div class="stat-icon-wrap" style="background:rgba(74,158,255,0.12)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4a9eff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/>
+            <line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/>
+            <line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/>
+            <line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/>
+            <line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/>
+          </svg>
+        </div>
+        <div class="stat-val" id="stat-cpu-val">—</div>
+        <div class="stat-label" data-i18n="stat_cpu">CPU Usage</div>
+        <div class="stat-change" style="color:var(--muted)">
+          <span data-i18n="stat_cpu_sub">Current load</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-glow" style="background:#f5a623"></div>
+        <div class="stat-icon-wrap" style="background:rgba(245,166,35,0.12)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f5a623" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/>
+            <path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/>
+          </svg>
+        </div>
+        <div class="stat-val" id="stat-mem-val">—</div>
+        <div class="stat-label" data-i18n="stat_mem">Memory</div>
+        <div class="stat-change" style="color:var(--muted)">
+          <span id="stat-mem-sub">—</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-glow" style="background:#a855f7"></div>
+        <div class="stat-icon-wrap" style="background:rgba(168,85,247,0.12)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2" stroke-linecap="round">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 8v4l3 3"/>
+          </svg>
+        </div>
+        <div class="stat-val" id="stat-uptime-val">—</div>
+        <div class="stat-label" data-i18n="stat_uptime">System Uptime</div>
+        <div class="stat-change" id="stat-health-change" style="color:var(--green)">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="18 15 12 9 6 15"/></svg>
+          <span id="stat-health-sub">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section: System Services -->
+    <div class="section-header">
+      <div>
+        <div class="section-eyebrow" data-i18n="services_eyebrow">System Services</div>
+        <div class="section-title" data-i18n="services_title">Running Services</div>
+      </div>
+      <div style="display:flex;gap:0.6rem">
+        <button id="btn-syscfg" style="padding:0.4rem 1rem;background:rgba(41,217,194,0.08);border:1px solid rgba(41,217,194,0.25);border-radius:9px;color:var(--cyan);font-family:inherit;font-size:0.75rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:0.35rem;transition:background 0.15s">⚙ system</button>
+        <button style="padding:0.4rem 1rem;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:9px;color:var(--muted);font-family:inherit;font-size:0.75rem;font-weight:700;cursor:pointer" data-i18n="add_service">+ Add Service</button>
+      </div>
+    </div>
+
+    <div class="services-grid">
+
+      <!-- Home Assistant -->
+      <div class="service-card" data-service-id="home-assistant">
+        <div class="service-top">
+          <div class="service-icon" style="background:rgba(41,184,150,0.15)">🏠</div>
+          <div class="service-status">
+            <div class="status-dot"></div>
+            <span class="status-text">RUNNING</span>
+          </div>
+        </div>
+        <div class="service-name">Home Assistant</div>
+        <div class="service-meta">
+          <span class="service-ver">v2024.1.2</span>
+          <span class="service-desc" data-i18n="svc_operating">Service operating normally</span>
+        </div>
+        <div class="spark">
+          <svg class="spark-svg" viewBox="0 0 120 32" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="sg1" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#3ddc84" stop-opacity="0.3"/>
+                <stop offset="100%" stop-color="#3ddc84" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <path class="spark-area" fill="url(#sg1)"/>
+            <path class="spark-line" fill="none" stroke="#3ddc84" stroke-width="1.5"/>
+          </svg>
+        </div>
+        <div class="service-actions">
+          <button class="btn-stop" data-i18n="btn_stop">STOP</button>
+          <button class="btn-restart" data-i18n="btn_restart">RESTART</button>
+          <button class="btn-open" data-i18n="btn_open">OPEN →</button>
+          <button class="btn-pkg install">INSTALL</button>
+        </div>
+      </div>
+
+      <!-- OpenClaw -->
+      <div class="service-card" data-service-id="openclaw">
+        <div class="service-top">
+          <div class="service-icon" style="background:rgba(74,158,255,0.15)">🦞</div>
+          <div style="display:flex;align-items:center;gap:0.5rem">
+            <div class="btn-upgrade-icon" title="Update available">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="16 16 12 12 8 16"/>
+                <line x1="12" y1="12" x2="12" y2="21"/>
+                <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+              </svg>
+            </div>
+            <div class="service-status">
+              <div class="status-dot"></div>
+              <span class="status-text">RUNNING</span>
+            </div>
+          </div>
+        </div>
+        <div class="service-name">OpenClaw</div>
+        <div class="service-meta">
+          <span class="service-ver">v1.4.2-stable</span>
+          <span class="service-desc" data-i18n="svc_running">Service running normally</span>
+        </div>
+        <div class="spark">
+          <svg class="spark-svg" viewBox="0 0 120 32" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="sg2" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#4a9eff" stop-opacity="0.3"/>
+                <stop offset="100%" stop-color="#4a9eff" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <path class="spark-area" fill="url(#sg2)"/>
+            <path class="spark-line" fill="none" stroke="#4a9eff" stroke-width="1.5"/>
+          </svg>
+        </div>
+        <div class="service-actions">
+          <button class="btn-stop" data-i18n="btn_stop">STOP</button>
+          <button class="btn-restart" data-i18n="btn_restart">RESTART</button>
+          <button class="btn-open" data-i18n="btn_open">OPEN →</button>
+          <button class="btn-pkg install">INSTALL</button>
+        </div>
+      </div>
+
+      <!-- Proxy Manager -->
+      <div class="service-card" data-service-id="proxy-manager">
+        <div class="service-top">
+          <div class="service-icon" style="background:rgba(168,85,247,0.15)">🔀</div>
+          <div class="service-status">
+            <div class="status-dot"></div>
+            <span class="status-text">RUNNING</span>
+          </div>
+        </div>
+        <div class="service-name">Proxy Manager</div>
+        <div class="service-meta">
+          <span class="service-ver">v2.10.4</span>
+          <span class="service-desc" data-i18n="svc_running">Service running normally</span>
+        </div>
+        <div class="spark">
+          <svg class="spark-svg" viewBox="0 0 120 32" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="sg3" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#a855f7" stop-opacity="0.3"/>
+                <stop offset="100%" stop-color="#a855f7" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <path class="spark-area" fill="url(#sg3)"/>
+            <path class="spark-line" fill="none" stroke="#a855f7" stroke-width="1.5"/>
+          </svg>
+        </div>
+        <div class="service-actions">
+          <button class="btn-stop" data-i18n="btn_stop">STOP</button>
+          <button class="btn-restart" data-i18n="btn_restart">RESTART</button>
+          <button class="btn-open" data-i18n="btn_open">OPEN →</button>
+          <button class="btn-pkg install">INSTALL</button>
+        </div>
+      </div>
+
+      <!-- HA Addons -->
+      <div class="service-card" data-service-id="addon-manager">
+        <div class="service-top">
+          <div class="service-icon" style="background:rgba(245,166,35,0.15)">🧩</div>
+          <div class="service-status">
+            <div class="status-dot"></div>
+            <span class="status-text">RUNNING</span>
+          </div>
+        </div>
+        <div class="service-name">HA Addons</div>
+        <div class="service-meta">
+          <span class="service-ver">v5.3.1</span>
+          <span class="service-desc" data-i18n="svc_addons">Addons service running</span>
+        </div>
+        <div class="spark">
+          <svg class="spark-svg" viewBox="0 0 120 32" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="sg4" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#f5a623" stop-opacity="0.3"/>
+                <stop offset="100%" stop-color="#f5a623" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <path class="spark-area" fill="url(#sg4)"/>
+            <path class="spark-line" fill="none" stroke="#f5a623" stroke-width="1.5"/>
+          </svg>
+        </div>
+        <div class="service-actions">
+          <button class="btn-stop" data-i18n="btn_stop">STOP</button>
+          <button class="btn-restart" data-i18n="btn_restart">RESTART</button>
+          <button class="btn-open" data-i18n="btn_open">OPEN →</button>
+          <button class="btn-pkg install">INSTALL</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Bottom row -->
+    <div class="bottom-row">
+
+      <!-- Activity -->
+      <div class="panel">
+        <div class="panel-title">
+          <span data-i18n="activity_title">Recent Activity</span>
+          <span class="panel-link" data-i18n="view_all">View All →</span>
+        </div>
+        <div id="activity-feed">
+          <div class="activity-item" style="opacity:0.4">
+            <div class="activity-icon" style="background:rgba(74,158,255,0.08)">⏳</div>
+            <div class="activity-text"><div class="activity-main">Loading activity…</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right column: usage + AI insight -->
+      <div style="display:flex;flex-direction:column;gap:1rem">
+
+        <div class="panel">
+          <div class="panel-title">
+            <span data-i18n="resource_title">Resource Usage</span>
+            <span class="panel-link" data-i18n="details">Details →</span>
+          </div>
+
+          <div class="usage-item">
+            <div class="usage-header">
+              <div class="usage-label">
+                <div style="width:8px;height:8px;border-radius:50%;background:#4a9eff;flex-shrink:0"></div>
+                <span data-i18n="res_cpu">CPU</span>
+              </div>
+              <div class="usage-val" id="res-cpu-val">—</div>
+            </div>
+            <div class="usage-bar">
+              <div class="usage-fill" id="res-cpu-bar" style="width:0%;background:linear-gradient(90deg,#4a9eff,#1a7fe8)"></div>
+            </div>
+          </div>
+
+          <div class="usage-item">
+            <div class="usage-header">
+              <div class="usage-label">
+                <div style="width:8px;height:8px;border-radius:50%;background:#a855f7;flex-shrink:0"></div>
+                <span data-i18n="res_mem">Memory</span>
+              </div>
+              <div class="usage-val" id="res-mem-val">—</div>
+            </div>
+            <div class="usage-bar">
+              <div class="usage-fill" id="res-mem-bar" style="width:0%;background:linear-gradient(90deg,#a855f7,#7c3aed)"></div>
+            </div>
+          </div>
+
+          <div class="usage-item">
+            <div class="usage-header">
+              <div class="usage-label">
+                <div style="width:8px;height:8px;border-radius:50%;background:#f5a623;flex-shrink:0"></div>
+                <span data-i18n="res_storage">Storage</span>
+              </div>
+              <div class="usage-val" id="res-storage-val">—</div>
+            </div>
+            <div class="usage-bar">
+              <div class="usage-fill" id="res-storage-bar" style="width:0%;background:linear-gradient(90deg,#f5a623,#e0901a)"></div>
+            </div>
+          </div>
+
+          <div class="usage-item">
+            <div class="usage-header">
+              <div class="usage-label">
+                <div style="width:8px;height:8px;border-radius:50%;background:#29d9c2;flex-shrink:0"></div>
+                <span data-i18n="res_tokens">Tokens (Monthly)</span>
+              </div>
+              <div class="usage-val" id="res-tokens-val">—</div>
+            </div>
+            <div class="usage-bar">
+              <div class="usage-fill" id="res-tokens-bar" style="width:0%;background:linear-gradient(90deg,#29d9c2,#0db5a0)"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">
+            🤖 <span data-i18n="insight_title">AI Predictive Insight</span>
+            <span class="panel-link" data-i18n="view_logs">View Logs →</span>
+          </div>
+          <div class="insight-card">
+            <div class="insight-icon">💡</div>
+            <div class="insight-text" data-i18n="insight1">
+              <strong>Lights routine optimized</strong> — Based on your schedule, HomeClaw has adjusted 3 lighting automations to save an estimated <strong>18% energy</strong> this week.
+            </div>
+          </div>
+          <div class="insight-card">
+            <div class="insight-icon">🌡️</div>
+            <div class="insight-text" data-i18n="insight2">
+              <strong>Temperature pre-conditioning</strong> — Bedroom AC will activate at <strong>6:45 AM</strong> tomorrow based on your wake pattern.
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- ═══ System Config Modal ═══ -->
+<div class="syscfg-overlay" id="syscfg-overlay">
+  <div class="syscfg-modal">
+
+    <!-- Header -->
+    <div class="syscfg-head">
+      <div class="syscfg-head-icon">⚙</div>
+      <div class="syscfg-head-info">
+        <div class="syscfg-head-title">System Configuration</div>
+        <div class="syscfg-head-sub">192.168.1.101:18080 · homeclaw-mgr API</div>
+      </div>
+      <button class="syscfg-close" id="syscfg-close">✕</button>
+    </div>
+
+    <!-- Body -->
+    <div class="syscfg-body">
+
+      <!-- Left: API buttons -->
+      <div class="syscfg-sidebar">
+        <div class="syscfg-group-label">Status</div>
+        <button class="syscfg-btn" data-api="health">
+          <span class="syscfg-btn-icon">💚</span> Health Check
+        </button>
+        <button class="syscfg-btn" data-api="versions">
+          <span class="syscfg-btn-icon">📦</span> Versions
+        </button>
+        <button class="syscfg-btn" data-api="latest">
+          <span class="syscfg-btn-icon">🔍</span> Latest
+          <span class="syscfg-btn-badge">apt</span>
+        </button>
+
+        <div class="syscfg-group-label">Operations</div>
+        <button class="syscfg-btn" data-api="install">
+          <span class="syscfg-btn-icon">📥</span> Install
+        </button>
+        <button class="syscfg-btn" data-api="upgrade">
+          <span class="syscfg-btn-icon">⬆️</span> Upgrade All
+        </button>
+        <button class="syscfg-btn danger" data-api="uninstall">
+          <span class="syscfg-btn-icon">🗑</span> Uninstall
+        </button>
+
+        <div class="syscfg-group-label">Tasks</div>
+        <button class="syscfg-btn" data-api="tasks">
+          <span class="syscfg-btn-icon">📋</span> Task History
+        </button>
+      </div>
+
+      <!-- Right: Result panel -->
+      <div class="syscfg-panel">
+        <div class="syscfg-panel-head" id="syscfg-panel-head">
+          <span class="syscfg-panel-method" id="syscfg-panel-method">GET</span>
+          <span class="syscfg-panel-name"  id="syscfg-panel-name">Select an API →</span>
+          <span class="syscfg-panel-url"   id="syscfg-panel-url"></span>
+          <button class="syscfg-run-btn"   id="syscfg-run-btn" style="display:none">▶ Run</button>
+        </div>
+        <div class="syscfg-result" id="syscfg-result">
+          <div class="syscfg-placeholder">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="12" cy="12" r="9"/><path d="M12 8v4l2 2"/>
+            </svg>
+            <span>点击左侧按钮调用 API</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Subtle mascot watermark -->
+<div class="mascot-watermark">
+  <svg width="320" height="320" viewBox="0 0 260 285" fill="none" opacity="1">
+    <ellipse cx="130" cy="185" rx="62" ry="65" fill="white"/>
+    <ellipse cx="130" cy="132" rx="56" ry="52" fill="white"/>
+    <path d="M76 138 Q52 128 44 114" stroke="white" stroke-width="13" stroke-linecap="round" fill="none"/>
+    <ellipse cx="37" cy="103" rx="21" ry="15" fill="white"/>
+    <path d="M184 138 Q208 128 216 114" stroke="white" stroke-width="13" stroke-linecap="round" fill="none"/>
+    <ellipse cx="223" cy="103" rx="21" ry="15" fill="white"/>
+    <path d="M107 244 Q102 264 98 274 Q114 267 130 269 Q146 267 162 274 Q158 264 153 244Z" fill="white"/>
+  </svg>
+</div>
+
+<script>
+const i18n = {
+  en: {
+    eyebrow:'OPERATIONAL OVERVIEW', page_title:'Home Dashboard', ai_badge:'AI MANAGED: ACTIVE',
+    nav_main:'Main', nav_home:'Home', nav_usage:'Usage', nav_services:'Services', nav_automations:'Automations',
+    nav_account:'Account', nav_topup:'Top Up', nav_billing:'Billing', nav_settings:'Settings',
+    user_tier:'Premium Tier',
+    stat_services:'Services Running', stat_services_sub:'All systems nominal',
+    stat_cpu:'CPU Usage', stat_cpu_sub:'Current load',
+    stat_mem:'Memory', stat_uptime:'System Uptime',
+    services_eyebrow:'System Services', services_title:'Running Services', add_service:'+ Add Service',
+    svc_operating:'Service operating normally', svc_running:'Service running normally', svc_addons:'Addons service running',
+    btn_stop:'STOP', btn_restart:'RESTART', btn_open:'OPEN →', btn_install:'INSTALL', btn_uninstall:'UNINSTALL',
+    activity_title:'Recent Activity', view_all:'View All →',
+    act1:'Home Assistant restarted successfully', act1_time:'2 minutes ago',
+    act2:'AI detected unusual device usage pattern in living room', act2_time:'18 minutes ago',
+    act3:'OpenClaw v1.4.2-stable update available', act3_time:'1 hour ago',
+    act4:'12 automations triggered overnight', act4_time:'8 hours ago',
+    act5:'Security scan completed — no threats detected', act5_time:'Yesterday, 11:42 PM',
+    resource_title:'Resource Usage', details:'Details →',
+    res_cpu:'CPU', res_mem:'Memory', res_storage:'Storage', res_tokens:'Tokens (Monthly)',
+    insight_title:'AI Predictive Insight', view_logs:'View Logs →',
+    insight1:'<strong>Lights routine optimized</strong> — Based on your schedule, HomeClaw has adjusted 3 lighting automations to save an estimated <strong>18% energy</strong> this week.',
+    insight2:'<strong>Temperature pre-conditioning</strong> — Bedroom AC will activate at <strong>6:45 AM</strong> tomorrow based on your wake pattern.',
+    system_active:'SYSTEM ACTIVE',
+  },
+  zh: {
+    eyebrow:'运行状态总览', page_title:'主页仪表盘', ai_badge:'AI 管理：运行中',
+    nav_main:'主菜单', nav_home:'主页', nav_usage:'用量', nav_services:'服务', nav_automations:'自动化',
+    nav_account:'账户', nav_topup:'充值', nav_billing:'账单', nav_settings:'设置',
+    user_tier:'高级会员',
+    stat_services:'运行中的服务', stat_services_sub:'所有系统正常',
+    stat_cpu:'CPU 使用率', stat_cpu_sub:'当前负载',
+    stat_mem:'内存', stat_uptime:'持续运行时长',
+    services_eyebrow:'系统服务', services_title:'运行中的服务', add_service:'+ 添加服务',
+    svc_operating:'服务运行正常', svc_running:'服务运行正常', svc_addons:'插件服务运行中',
+    btn_stop:'停止', btn_restart:'重启', btn_open:'打开 →', btn_install:'安装', btn_uninstall:'卸载',
+    activity_title:'最近活动', view_all:'查看全部 →',
+    act1:'Home Assistant 重启成功', act1_time:'2 分钟前',
+    act2:'AI 检测到客厅设备异常使用模式', act2_time:'18 分钟前',
+    act3:'OpenClaw v1.4.2-stable 更新可用', act3_time:'1 小时前',
+    act4:'12 个自动化任务在夜间触发', act4_time:'8 小时前',
+    act5:'安全扫描完成 — 未发现威胁', act5_time:'昨天 23:42',
+    resource_title:'资源使用', details:'详情 →',
+    res_cpu:'CPU', res_mem:'内存', res_storage:'存储', res_tokens:'Token（本月）',
+    insight_title:'AI 预测洞察', view_logs:'查看日志 →',
+    insight1:'<strong>照明方案已优化</strong> — 根据您的日程，HomeClaw 已调整 3 个照明自动化，预计本周节省 <strong>18% 电量</strong>。',
+    insight2:'<strong>温度预处理</strong> — 根据您的起床规律，卧室空调将于明天 <strong>6:45</strong> 自动启动。',
+    system_active:'系统运行中',
+  },
+  ja: {
+    eyebrow:'オペレーション概要', page_title:'ホームダッシュボード', ai_badge:'AI管理：稼働中',
+    nav_main:'メイン', nav_home:'ホーム', nav_usage:'使用状況', nav_services:'サービス', nav_automations:'オートメーション',
+    nav_account:'アカウント', nav_topup:'チャージ', nav_billing:'請求', nav_settings:'設定',
+    user_tier:'プレミアム',
+    stat_services:'稼働中サービス', stat_services_sub:'全システム正常',
+    stat_cpu:'CPU 使用率', stat_cpu_sub:'現在の負荷',
+    stat_mem:'メモリ', stat_uptime:'稼働時間',
+    services_eyebrow:'システムサービス', services_title:'稼働中のサービス', add_service:'+ サービス追加',
+    svc_operating:'サービスは正常に動作しています', svc_running:'サービスは正常に稼働中', svc_addons:'アドオンサービス稼働中',
+    btn_stop:'停止', btn_restart:'再起動', btn_open:'開く →', btn_install:'インストール', btn_uninstall:'アンインストール',
+    activity_title:'最近のアクティビティ', view_all:'すべて表示 →',
+    act1:'Home Assistant が正常に再起動しました', act1_time:'2分前',
+    act2:'AIがリビングルームで異常な使用パターンを検出', act2_time:'18分前',
+    act3:'OpenClaw v1.4.2-stable アップデートあり', act3_time:'1時間前',
+    act4:'夜間に12件の自動化がトリガーされました', act4_time:'8時間前',
+    act5:'セキュリティスキャン完了 — 脅威なし', act5_time:'昨日 23:42',
+    resource_title:'リソース使用量', details:'詳細 →',
+    res_cpu:'CPU', res_mem:'メモリ', res_storage:'ストレージ', res_tokens:'トークン（月間）',
+    insight_title:'AI予測インサイト', view_logs:'ログを見る →',
+    insight1:'<strong>照明ルーティン最適化済み</strong> — スケジュールに基づき、今週 <strong>18%の省エネ</strong> が見込まれる3つの照明自動化を調整しました。',
+    insight2:'<strong>温度プリコンディショニング</strong> — 起床パターンに基づき、明日 <strong>6:45</strong> に寝室エアコンが起動します。',
+    system_active:'システム稼働中',
+  },
+  ko: {
+    eyebrow:'운영 현황', page_title:'홈 대시보드', ai_badge:'AI 관리: 활성',
+    nav_main:'메인', nav_home:'홈', nav_usage:'사용량', nav_services:'서비스', nav_automations:'자동화',
+    nav_account:'계정', nav_topup:'충전', nav_billing:'결제', nav_settings:'설정',
+    user_tier:'프리미엄',
+    stat_services:'실행 중인 서비스', stat_services_sub:'모든 시스템 정상',
+    stat_cpu:'CPU 사용률', stat_cpu_sub:'현재 부하',
+    stat_mem:'메모리', stat_uptime:'가동 시간',
+    services_eyebrow:'시스템 서비스', services_title:'실행 중인 서비스', add_service:'+ 서비스 추가',
+    svc_operating:'서비스가 정상적으로 실행 중', svc_running:'서비스 정상 실행 중', svc_addons:'애드온 서비스 실행 중',
+    btn_stop:'중지', btn_restart:'재시작', btn_open:'열기 →', btn_install:'설치', btn_uninstall:'제거',
+    activity_title:'최근 활동', view_all:'전체 보기 →',
+    act1:'Home Assistant가 성공적으로 재시작되었습니다', act1_time:'2분 전',
+    act2:'AI가 거실에서 비정상적인 기기 사용 패턴 감지', act2_time:'18분 전',
+    act3:'OpenClaw v1.4.2-stable 업데이트 가능', act3_time:'1시간 전',
+    act4:'야간에 12개의 자동화가 실행되었습니다', act4_time:'8시간 전',
+    act5:'보안 스캔 완료 — 위협 없음', act5_time:'어제 오후 11:42',
+    resource_title:'리소스 사용량', details:'자세히 →',
+    res_cpu:'CPU', res_mem:'메모리', res_storage:'스토리지', res_tokens:'토큰 (월간)',
+    insight_title:'AI 예측 인사이트', view_logs:'로그 보기 →',
+    insight1:'<strong>조명 루틴 최적화 완료</strong> — 일정에 따라 3개의 조명 자동화를 조정하여 이번 주 <strong>18% 에너지</strong>를 절약할 것으로 예상됩니다.',
+    insight2:'<strong>온도 사전 조절</strong> — 기상 패턴을 기반으로 내일 <strong>6:45</strong>에 침실 에어컨이 활성화됩니다.',
+    system_active:'시스템 활성',
+  },
+};
+
+
+// Append new translations
+if (typeof i18n !== 'undefined') {
+  if (i18n.en) Object.assign(i18n.en, { nav_docs:'Docs', nav_faq:'FAQ', nav_pricing:'Pricing', nav_integration:'Integration', nav_contact:'Contact us' });
+  if (i18n.zh) Object.assign(i18n.zh, { nav_docs:'文档', nav_faq:'常见问题', nav_pricing:'定价', nav_integration:'集成', nav_contact:'联系我们' });
+  if (i18n.ja) Object.assign(i18n.ja, { nav_docs:'ドキュメント', nav_faq:'よくある質問', nav_pricing:'料金プラン', nav_integration:'連携', nav_contact:'お問い合わせ' });
+  if (i18n.ko) Object.assign(i18n.ko, { nav_docs:'문서', nav_faq:'자주 묻는 질문', nav_pricing:'요금제', nav_integration:'연동', nav_contact:'문의하기' });
+}
+
+function applyLang(lang) {
+  const t = i18n[lang] || i18n.en;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const k = el.dataset.i18n;
+    if (t[k] === undefined) return;
+    // Use innerHTML for elements containing HTML markup
+    if (t[k].includes('<')) {
+      el.innerHTML = t[k];
+    } else {
+      el.textContent = t[k];
+    }
+  });
+  document.documentElement.lang = lang;
+  const sysLabel = document.querySelector('[data-system-active]');
+  if (sysLabel) sysLabel.textContent = t.system_active;
+}
+
+document.querySelectorAll('.lang-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    applyLang(btn.dataset.lang);
+    localStorage.setItem('homeclaw_lang', btn.dataset.lang);
+    updateHealthBadge();
+  });
+});
+
+const savedLang = localStorage.getItem('homeclaw_lang') || 'en';
+document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+const activeBtn = document.querySelector(`.lang-btn[data-lang="${savedLang}"]`);
+if (activeBtn) activeBtn.classList.add('active');
+applyLang(savedLang);
+
+// ── CPU Sparkline ─────────────────────────────────────────────────────────────
+
+const SPARK_MAX = 24; // keep last 24 readings (≈6 min at 15s interval)
+const cpuHistory = [];
+const _svcRunning = new Set(); // ids of currently running services
+
+function buildSparkPaths(data) {
+  const W = 120, H = 32, PAD = 3;
+  const n = data.length;
+  if (n < 2) return { area: '', line: '' };
+  // Dynamic Y ceiling: 1.5× current max, minimum 5%, cap at 100%
+  const maxVal = Math.max(...data);
+  const ceiling = Math.min(Math.max(maxVal * 1.5, 5), 100);
+  const pts = data.map((v, i) => {
+    const x = (i / (SPARK_MAX - 1)) * W;
+    const y = H - PAD - (Math.min(v, ceiling) / ceiling) * (H - PAD * 2);
+    return [x.toFixed(1), y.toFixed(1)];
+  });
+  const linePart = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p[0]} ${p[1]}`).join(' ');
+  const last = pts[pts.length - 1];
+  const first = pts[0];
+  const area = `${linePart} L${last[0]} ${H} L${first[0]} ${H} Z`;
+  return { area, line: linePart };
+}
+
+function refreshSparklines() {
+  const { area, line } = buildSparkPaths(cpuHistory);
+  document.querySelectorAll('.service-card[data-service-id] .spark-svg').forEach(svg => {
+    const id = svg.closest('.service-card')?.dataset.serviceId;
+    const isRunning = _svcRunning.has(id);
+    const areaEl = svg.querySelector('.spark-area');
+    const lineEl = svg.querySelector('.spark-line');
+    if (areaEl) areaEl.setAttribute('d', isRunning ? area : '');
+    if (lineEl) lineEl.setAttribute('d', isRunning ? line : '');
+  });
+}
+
+// ── Uptime + Health helpers ───────────────────────────────────────────────────
+
+function formatUptime(secs) {
+  const d = Math.floor(secs / 86400);
+  const h = Math.floor((secs % 86400) / 3600);
+  const m = Math.floor((secs % 3600) / 60);
+  if (d > 0) return d + 'd ' + h + 'h';
+  if (h > 0) return h + 'h ' + m + 'm';
+  return m + 'm';
+}
+
+let _lastRes = { cpu: 0, mem: 0, storage: 0 };
+
+const HEALTH_LEVELS = [
+  { max: 40, label: { en:'Excellent', zh:'极佳', ja:'非常に良好', ko:'매우 좋음' }, color: 'var(--green)' },
+  { max: 65, label: { en:'Good',      zh:'良好', ja:'良好',       ko:'양호'     }, color: 'var(--cyan)' },
+  { max: 85, label: { en:'Fair',      zh:'一般', ja:'普通',       ko:'보통'     }, color: 'var(--amber)' },
+  { max: 101,label: { en:'Under Load',zh:'高负载',ja:'高負荷',    ko:'과부하'   }, color: 'var(--red)' },
+];
+
+function calcHealth(cpu, mem, storage) {
+  const avg = (cpu + mem + storage) / 3;
+  return HEALTH_LEVELS.find(h => avg < h.max) || HEALTH_LEVELS[HEALTH_LEVELS.length - 1];
+}
+
+function updateHealthBadge() {
+  const h = calcHealth(_lastRes.cpu, _lastRes.mem, _lastRes.storage);
+  const lang = localStorage.getItem('homeclaw_lang') || 'en';
+  const sub = document.getElementById('stat-health-sub');
+  const chg = document.getElementById('stat-health-change');
+  if (sub) sub.textContent = h.label[lang] || h.label.en;
+  if (chg) chg.style.color = h.color;
+}
+
+// ── Live data from backend ────────────────────────────────────────────────────
+
+function setBar(valId, barId, pct, note) {
+  const v = document.getElementById(valId);
+  const b = document.getElementById(barId);
+  if (!v || !b) return;
+  if (note) {
+    v.textContent = note;
+    b.style.width = '0%';
+  } else {
+    v.textContent = pct.toFixed(1) + '%';
+    b.style.width = Math.min(pct, 100) + '%';
+  }
+}
+
+function fetchResources() {
+  fetch('/api/resources')
+    .then(r => r.json())
+    .then(d => {
+      setBar('res-cpu-val',     'res-cpu-bar',     d.cpu_pct);
+      setBar('res-mem-val',     'res-mem-bar',     d.mem_pct);
+      setBar('res-storage-val', 'res-storage-bar', d.storage_pct);
+      if (d.tokens_note) {
+        setBar('res-tokens-val', 'res-tokens-bar', 0, 'N/A');
+      } else {
+        setBar('res-tokens-val', 'res-tokens-bar', d.tokens_monthly_pct);
+      }
+
+      // Stat card 2: CPU
+      const cpuCard = document.getElementById('stat-cpu-val');
+      if (cpuCard) cpuCard.textContent = d.cpu_pct.toFixed(1) + '%';
+
+      // Stat card 3: Memory
+      const memCard = document.getElementById('stat-mem-val');
+      if (memCard) memCard.textContent = d.mem_pct.toFixed(1) + '%';
+      const memSub = document.getElementById('stat-mem-sub');
+      if (memSub) {
+        const usedGB = (d.mem_used_mb / 1024).toFixed(1);
+        const totalGB = (d.mem_total_mb / 1024).toFixed(1);
+        memSub.textContent = usedGB + ' GB / ' + totalGB + ' GB';
+      }
+
+      // Health badge (stat card 4)
+      _lastRes = { cpu: d.cpu_pct, mem: d.mem_pct, storage: d.storage_pct };
+      updateHealthBadge();
+
+      // CPU sparkline history
+      cpuHistory.push(d.cpu_pct);
+      if (cpuHistory.length > SPARK_MAX) cpuHistory.shift();
+      refreshSparklines();
+    })
+    .catch(() => {});
+}
+
+function fetchOverview() {
+  fetch('/api/overview')
+    .then(r => r.json())
+    .then(d => {
+      const sv = document.getElementById('stat-services-val');
+      if (sv) sv.textContent = d.services_running;
+      const uv = document.getElementById('stat-uptime-val');
+      if (uv && d.uptime_seconds) uv.textContent = formatUptime(d.uptime_seconds);
+    })
+    .catch(() => {});
+}
+
+// Initial fetch on page load
+fetchResources();
+fetchOverview();
+
+// Poll: resources every 15 s, overview every 30 s
+setInterval(fetchResources, 15000);
+setInterval(fetchOverview,  30000);
+
+// ── Service cards: real status + button actions ───────────────────────────────
+
+function applyServiceStatus(card, status) {
+  const dot  = card.querySelector('.status-dot');
+  const text = card.querySelector('.status-text');
+  const isRunning = status === 'running';
+  if (dot) {
+    dot.classList.toggle('stopped', !isRunning);
+  }
+  if (text) {
+    text.textContent = isRunning ? 'RUNNING' : 'STOPPED';
+  }
+  // dim the card slightly when stopped
+  card.style.opacity = isRunning ? '1' : '0.65';
+}
+
+function applyPkgButton(card, installed) {
+  const btn = card.querySelector('.btn-pkg');
+  if (!btn) return;
+  if (installed) {
+    btn.textContent = 'UNINSTALL';
+    btn.classList.remove('install');
+    btn.classList.add('uninstall');
+    btn.dataset.installed = '1';
+  } else {
+    btn.textContent = 'INSTALL';
+    btn.classList.remove('uninstall');
+    btn.classList.add('install');
+    btn.dataset.installed = '0';
+  }
+}
+
+function fetchServices() {
+  fetch('/api/services')
+    .then(r => r.json())
+    .then(list => {
+      // Rebuild running set then refresh sparklines
+    _svcRunning.clear();
+    list.forEach(svc => { if (svc.status === 'running') _svcRunning.add(svc.id); });
+    refreshSparklines();
+
+    list.forEach(svc => {
+        const card = document.querySelector(`.service-card[data-service-id="${svc.id}"]`);
+        if (!card) return;
+        // Update running status badge
+        applyServiceStatus(card, svc.status);
+        // Update version number from backend (real version, not hardcoded)
+        const verEl = card.querySelector('.service-ver');
+        if (verEl && svc.version) verEl.textContent = svc.version;
+        // Update install/uninstall toggle button
+        applyPkgButton(card, svc.installed);
+      });
+    })
+    .catch(() => {});
+}
+
+function disableCardButtons(card, seconds) {
+  const btns = card.querySelectorAll('.btn-stop, .btn-restart, .btn-open');
+  btns.forEach(b => { b.disabled = true; b.style.opacity = '0.4'; });
+  setTimeout(() => {
+    btns.forEach(b => { b.disabled = false; b.style.opacity = ''; });
+  }, seconds * 1000);
+}
+
+// Bind stop / restart / open buttons on every service card
+document.querySelectorAll('.service-card[data-service-id]').forEach(card => {
+  const id = card.dataset.serviceId;
+
+  card.querySelector('.btn-stop')?.addEventListener('click', () => {
+    disableCardButtons(card, 5);
+    fetch(`/api/services/${id}/stop`, { method: 'POST' })
+      .then(r => r.json())
+      .then(() => { setTimeout(fetchServices, 1500); })
+      .catch(() => {});
+  });
+
+  card.querySelector('.btn-restart')?.addEventListener('click', () => {
+    disableCardButtons(card, 8);
+    fetch(`/api/services/${id}/restart`, { method: 'POST' })
+      .then(r => r.json())
+      .then(() => { setTimeout(fetchServices, 3000); })
+      .catch(() => {});
+  });
+
+  card.querySelector('.btn-open')?.addEventListener('click', () => {
+    fetch(`/api/services/${id}/open`)
+      .then(r => r.json())
+      .then(d => { if (d.url) window.open(d.url, '_blank'); })
+      .catch(() => {});
+  });
+
+  card.querySelector('.btn-pkg')?.addEventListener('click', function() {
+    const isInstalled = this.dataset.installed === '1';
+    const action = isInstalled ? 'uninstall' : 'install';
+    const msg = isInstalled
+      ? `Uninstall ${id}? This will stop and remove the service.`
+      : `Install ${id}?`;
+    if (!confirm(msg)) return;
+    this.disabled = true;
+    this.style.opacity = '0.4';
+    fetch(`/api/services/${id}/${action}`, { method: 'POST' })
+      .then(r => r.json())
+      .then(() => { setTimeout(fetchServices, 3000); })
+      .catch(() => {})
+      .finally(() => { this.disabled = false; this.style.opacity = ''; });
+  });
+});
+
+// Initial fetch + poll every 20 s
+fetchServices();
+setInterval(fetchServices, 20000);
+
+// ── Activity feed ─────────────────────────────────────────────────────────────
+
+const ACTIVITY_BG = {
+  success: 'rgba(61,220,132,0.12)',
+  info:    'rgba(74,158,255,0.12)',
+  warning: 'rgba(245,166,35,0.12)',
+  error:   'rgba(232,53,42,0.12)',
+};
+
+function timeAgo(isoStr) {
+  const diff = Math.floor((Date.now() - new Date(isoStr).getTime()) / 1000);
+  if (diff < 5)    return 'just now';
+  if (diff < 60)   return diff + 's ago';
+  if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+  if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+  return Math.floor(diff / 86400) + 'd ago';
+}
+
+function fetchActivity() {
+  fetch('/api/activity')
+    .then(r => r.json())
+    .then(items => {
+      const feed = document.getElementById('activity-feed');
+      if (!feed) return;
+      if (!items || items.length === 0) {
+        feed.innerHTML = '<div class="activity-item" style="opacity:0.4"><div class="activity-icon" style="background:rgba(74,158,255,0.08)">📭</div><div class="activity-text"><div class="activity-main">No activity yet</div></div></div>';
+        return;
+      }
+      feed.innerHTML = items.slice(0, 15).map(item => `
+        <div class="activity-item">
+          <div class="activity-icon" style="background:${ACTIVITY_BG[item.category] || ACTIVITY_BG.info}">${item.icon}</div>
+          <div class="activity-text">
+            <div class="activity-main">${item.message}</div>
+            <div class="activity-time">${timeAgo(item.timestamp)}</div>
+          </div>
+        </div>`).join('');
+    })
+    .catch(() => {});
+}
+
+fetchActivity();
+setInterval(fetchActivity, 15000);
+
+// ══════════════════════════════════════════════════════
+// System Config Modal
+// ══════════════════════════════════════════════════════
+(function () {
+  const SYS_BASE = '';  // 同源代理：/api/sys/* → 9090 → 18080
+
+  const API_DEFS = {
+    health:    { method: 'GET',  path: '/api/sys/health',    label: 'Health Check',  danger: false },
+    versions:  { method: 'GET',  path: '/api/sys/versions',  label: 'Versions',      danger: false },
+    latest:    { method: 'GET',  path: '/api/sys/latest?update=false', label: 'Latest', danger: false },
+    install:   { method: 'POST', path: '/api/sys/install',   label: 'Install',       danger: false, async: true },
+    upgrade:   { method: 'POST', path: '/api/sys/upgrade',   label: 'Upgrade All',   danger: false, async: true, body: { yes: true } },
+    uninstall: { method: 'POST', path: '/api/sys/uninstall', label: 'Uninstall',     danger: true,  async: true, body: { yes: true } },
+    tasks:     { method: 'GET',  path: '/api/sys/tasks',     label: 'Task History',  danger: false },
+  };
+
+  const overlay   = document.getElementById('syscfg-overlay');
+  const closeBtn  = document.getElementById('syscfg-close');
+  const openBtn   = document.getElementById('btn-syscfg');
+  const resultEl  = document.getElementById('syscfg-result');
+  const headName  = document.getElementById('syscfg-panel-name');
+  const headMethod= document.getElementById('syscfg-panel-method');
+  const headUrl   = document.getElementById('syscfg-panel-url');
+  const runBtn    = document.getElementById('syscfg-run-btn');
+
+  let currentApi  = null;
+  let pollTimer   = null;
+
+  // ── Open / Close ──────────────────────────────────────
+  openBtn.addEventListener('click', () => overlay.classList.add('open'));
+  closeBtn.addEventListener('click', closeModal);
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+  function closeModal() {
+    overlay.classList.remove('open');
+    clearPoll();
+  }
+
+  // ── Sidebar button selection ──────────────────────────
+  document.querySelectorAll('.syscfg-btn[data-api]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.syscfg-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectApi(btn.dataset.api);
+    });
+  });
+
+  function selectApi(key) {
+    clearPoll();
+    currentApi = key;
+    const def = API_DEFS[key];
+    headName.textContent   = def.label;
+    headUrl.textContent    = '→ 192.168.1.101:18080' + def.path.replace('/api/sys', '/api/v1');
+    headMethod.textContent = def.method;
+    headMethod.className   = 'syscfg-panel-method' + (def.method === 'POST' ? ' post' : '');
+    runBtn.style.display   = '';
+    runBtn.textContent     = def.async ? '▶ Run (async)' : '▶ Run';
+    runBtn.className       = 'syscfg-run-btn' + (def.danger ? ' danger' : '');
+    runBtn.disabled        = false;
+
+    // For GET endpoints, auto-run immediately
+    if (def.method === 'GET') {
+      setResult('<div class="syscfg-loading"><div class="syscfg-spin"></div>请求中...</div>');
+      callApi(key);
+    } else {
+      setResult('<div class="syscfg-placeholder" style="height:100%"><span style="color:var(--muted)">点击 Run 执行操作</span></div>');
+    }
+  }
+
+  runBtn.addEventListener('click', () => {
+    if (!currentApi) return;
+    const def = API_DEFS[currentApi];
+    if (def.danger) {
+      if (!confirm(`确认执行 ${def.label}？此操作将卸载系统依赖包。`)) return;
+    }
+    runBtn.disabled = true;
+    setResult('<div class="syscfg-loading"><div class="syscfg-spin"></div>请求中...</div>');
+    callApi(currentApi);
+  });
+
+  // ── API call ──────────────────────────────────────────
+  function callApi(key) {
+    const def = API_DEFS[key];
+    const url = SYS_BASE + def.path;
+    const opts = { method: def.method };
+    if (def.body) {
+      opts.headers = { 'Content-Type': 'application/json' };
+      opts.body = JSON.stringify(def.body);
+    }
+
+    fetch(url, opts)
+      .then(r => r.json())
+      .then(data => {
+        runBtn.disabled = false;
+        if (def.async && data.task_id) {
+          // Async task: show task bar and start polling
+          showTaskStarted(data);
+          pollTask(data.task_id);
+        } else if (key === 'tasks') {
+          renderTaskList(data);
+        } else {
+          renderJson(data);
+        }
+      })
+      .catch(err => {
+        runBtn.disabled = false;
+        setResult(`<div style="color:var(--red);font-size:0.78rem;padding:0.5rem 0">
+          ⚠ 请求失败：${escHtml(String(err))}<br>
+          <span style="color:var(--muted);font-size:0.68rem">请确认 homeclaw-mgr api 服务正在运行</span>
+        </div>`);
+      });
+  }
+
+  // ── Polling async task ────────────────────────────────
+  function pollTask(taskId) {
+    clearPoll();
+    function tick() {
+      fetch(`${SYS_BASE}/api/sys/tasks/${taskId}`)
+        .then(r => r.json())
+        .then(task => {
+          updateTaskPanel(task);
+          if (task.status === 'running') {
+            pollTimer = setTimeout(tick, 2000);
+          } else {
+            runBtn.disabled = false;
+          }
+        })
+        .catch(() => { runBtn.disabled = false; });
+    }
+    tick();
+  }
+
+  function clearPoll() {
+    if (pollTimer) { clearTimeout(pollTimer); pollTimer = null; }
+  }
+
+  // ── Render helpers ────────────────────────────────────
+  function setResult(html) { resultEl.innerHTML = html; }
+
+  function showTaskStarted(data) {
+    setResult(`
+      <div class="syscfg-task-bar">
+        <span class="syscfg-tag-running">● RUNNING</span>
+        <span style="color:var(--muted);font-size:0.68rem">task_id: <strong style="color:var(--text)">${escHtml(data.task_id)}</strong></span>
+        <span style="color:var(--muted);font-size:0.68rem;flex:1;text-align:right">${escHtml(data.message || '')}</span>
+      </div>
+      <div id="syscfg-log-body" style="margin-top:0.5rem"></div>
+    `);
+  }
+
+  function updateTaskPanel(task) {
+    const statusTag = task.status === 'success'
+      ? `<span class="syscfg-tag-success">● SUCCESS</span>`
+      : task.status === 'failed'
+        ? `<span class="syscfg-tag-failed">● FAILED (exit ${task.exit_code})</span>`
+        : `<span class="syscfg-tag-running">● RUNNING</span>`;
+
+    const duration = task.finished_at
+      ? ((new Date(task.finished_at) - new Date(task.created_at)) / 1000).toFixed(1) + 's'
+      : '…';
+
+    const bar = `
+      <div class="syscfg-task-bar">
+        ${statusTag}
+        <span style="color:var(--muted);font-size:0.68rem">task: <strong style="color:var(--text)">${escHtml(task.id)}</strong></span>
+        <span style="color:var(--muted);font-size:0.68rem">cmd: <strong style="color:var(--text)">${escHtml(task.command)}</strong></span>
+        <span style="color:var(--muted);font-size:0.68rem;flex:1;text-align:right">${duration}</span>
+      </div>`;
+
+    // Format log output: strip ANSI, colorize [INFO]/[SUCCESS]/[WARN]/[ERROR]
+    const cleanLog = stripAnsi(task.output || '');
+    const logLines = cleanLog.split('\n').filter(l => l.trim()).map(line => {
+      let cls = 'syscfg-log-line';
+      const colored = line
+        .replace(/(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/g, '<span class="syscfg-log-ts">$1</span>')
+        .replace(/\[SUCCESS\]/g, '<span class="syscfg-tag-success">[SUCCESS]</span>')
+        .replace(/\[ERROR\]/g,   '<span class="syscfg-tag-failed">[ERROR]</span>')
+        .replace(/\[WARN\]/g,    '<span style="color:var(--amber);font-weight:700">[WARN]</span>')
+        .replace(/\[INFO\]/g,    '<span class="syscfg-tag-info">[INFO]</span>');
+      return `<div class="${cls}">${colored}</div>`;
+    }).join('');
+
+    setResult(bar + `<div style="margin-top:0.5rem">${logLines || '<span style="color:var(--muted2)">（暂无输出）</span>'}</div>`);
+    // auto-scroll to bottom
+    resultEl.scrollTop = resultEl.scrollHeight;
+  }
+
+  function renderTaskList(tasks) {
+    if (!tasks || tasks.length === 0) {
+      setResult('<div style="color:var(--muted2);font-size:0.78rem;padding:0.5rem 0">暂无任务记录</div>');
+      return;
+    }
+    const rows = tasks.map(t => {
+      const statusEl = t.status === 'success'
+        ? `<span class="syscfg-tag-success">✓ success</span>`
+        : t.status === 'failed'
+          ? `<span class="syscfg-tag-failed">✗ failed</span>`
+          : `<span class="syscfg-tag-running">● running</span>`;
+      const dur = t.finished_at
+        ? ((new Date(t.finished_at) - new Date(t.created_at)) / 1000).toFixed(1) + 's'
+        : '…';
+      const ts = t.created_at ? t.created_at.slice(0,19).replace('T',' ') : '';
+      return `<div style="display:flex;align-items:center;gap:0.8rem;padding:0.45rem 0;border-bottom:1px solid var(--border);font-size:0.72rem">
+        <span style="color:var(--muted2);width:88px;flex-shrink:0;font-size:0.65rem">${escHtml(t.id)}</span>
+        <span style="color:var(--text);font-weight:700;width:70px;flex-shrink:0">${escHtml(t.command)}</span>
+        ${statusEl}
+        <span style="color:var(--muted2);flex:1;text-align:right;font-size:0.65rem">${escHtml(ts)} · ${dur}</span>
+      </div>`;
+    }).join('');
+    setResult(`
+      <div style="font-size:0.68rem;color:var(--muted2);padding-bottom:0.5rem">共 ${tasks.length} 条记录</div>
+      ${rows}
+    `);
+  }
+
+  function renderJson(data) {
+    const pretty = JSON.stringify(data, null, 2);
+    const highlighted = pretty
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"([^"]+)":/g, '<span class="syscfg-json-key">"$1"</span>:')
+      .replace(/: "([^"]*)"/g, ': <span class="syscfg-json-str">"$1"</span>')
+      .replace(/: (\d+\.?\d*)/g, ': <span class="syscfg-json-num">$1</span>')
+      .replace(/: (true|false)/g, ': <span class="syscfg-json-bool">$1</span>')
+      .replace(/: (null)/g, ': <span class="syscfg-json-null">$1</span>');
+    setResult(`<pre style="white-space:pre-wrap;word-break:break-all">${highlighted}</pre>`);
+  }
+
+  // ── Utils ─────────────────────────────────────────────
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function stripAnsi(s) {
+    // eslint-disable-next-line no-control-regex
+    return s.replace(/\x1b\[[0-9;]*m/g, '');
+  }
+})();
+</script>
+
+</body>
+</html>

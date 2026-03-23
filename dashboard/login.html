@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HomeClaw – Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Noto+Sans+SC:wght@400;500&family=Noto+Sans+JP:wght@400;500&family=Noto+Sans+KR:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --red:   #e8352a;
+  --cyan:  #29d9c2;
+  --bg:    #0f0709;
+  --text:  #f0ece8;
+  --muted: rgba(240,236,232,0.42);
+  --card:  rgba(12,6,8,0.82);
+  --bdr:   rgba(255,255,255,0.08);
+}
+
+html, body {
+  height: 100%; overflow: hidden;
+  font-family: 'Nunito', 'Noto Sans SC', 'Noto Sans JP', 'Noto Sans KR', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* ─── BG ─── */
+.bg {
+  position: fixed; inset: 0; z-index: 0;
+  background:
+    radial-gradient(ellipse 90% 75% at 50% 110%, rgba(140,18,10,0.55) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 50% at 20% 50%, rgba(160,25,15,0.14) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 80% 50%, rgba(41,217,194,0.05) 0%, transparent 60%);
+}
+.bg::after {
+  content: ''; position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.011) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.011) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+
+/* ─── BUBBLES ─── */
+.bubbles { position: fixed; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
+.bubble {
+  position: absolute; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, rgba(255,90,70,0.14), transparent 70%);
+  border: 1px solid rgba(255,90,70,0.09);
+  animation: rise linear infinite;
+}
+@keyframes rise {
+  from { transform: translateY(0); opacity: 0; }
+  8%   { opacity: 0.75; }
+  92%  { opacity: 0.25; }
+  to   { transform: translateY(-115vh); opacity: 0; }
+}
+
+/* ─── PAGE: centered column ─── */
+.page {
+  position: relative; z-index: 2;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem 1.5rem 2rem;
+  gap: 0;
+}
+
+/* ─── TOP BAR ─── */
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 10;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.1rem 2rem;
+}
+
+.brand-row {
+  display: flex; align-items: center; gap: 0.55rem;
+}
+.brand-icon {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, #38b6ff, #0060dd);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 14px rgba(0,130,255,0.4);
+  flex-shrink: 0;
+}
+.brand-name {
+  font-size: 1.1rem; font-weight: 900;
+  letter-spacing: 0.02em; color: #fff;
+}
+
+/* Language switcher */
+.lang-switcher {
+  display: flex; align-items: center;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 100px;
+  padding: 0.28rem 0.4rem;
+  gap: 0.1rem;
+}
+.lang-btn {
+  padding: 0.28rem 0.7rem;
+  border-radius: 100px;
+  font-size: 0.72rem; font-weight: 800;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all .2s;
+  user-select: none;
+  border: none; background: none;
+  font-family: inherit;
+}
+.lang-btn.active {
+  background: rgba(41,217,194,0.18);
+  color: var(--cyan);
+}
+.lang-btn:hover:not(.active) { color: #fff; }
+
+/* ─── MASCOT ─── */
+.mascot-wrap {
+  margin-bottom: -10px;
+  animation: bob 3.8s ease-in-out infinite;
+  filter:
+    drop-shadow(0 22px 48px rgba(200,40,20,0.65))
+    drop-shadow(0 6px 14px rgba(200,40,20,0.35));
+}
+@keyframes bob {
+  0%,100% { transform: translateY(0) rotate(-1.5deg); }
+  50%      { transform: translateY(-14px) rotate(1.5deg); }
+}
+
+/* ─── CARD ─── */
+.card {
+  width: min(400px, 92vw);
+  background: var(--card);
+  border: 1px solid var(--bdr);
+  border-radius: 24px;
+  padding: 2rem 2rem 1.8rem;
+  backdrop-filter: blur(36px) saturate(1.5);
+  box-shadow:
+    0 0 0 1px rgba(232,53,42,0.1),
+    0 30px 80px rgba(0,0,0,0.85),
+    inset 0 1px 0 rgba(255,255,255,0.07);
+  animation: slideUp 0.7s 0.05s cubic-bezier(.22,.9,.36,1) both;
+  position: relative; overflow: hidden;
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(22px) scale(0.97); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* top glow line */
+.card::before {
+  content: ''; position: absolute;
+  top: 0; left: 10%; right: 10%; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--red), transparent);
+  border-radius: 100px;
+}
+
+/* headline inside card */
+.card-headline {
+  text-align: center;
+  margin-bottom: 1.6rem;
+}
+.card-title {
+  font-size: 1.35rem; font-weight: 900;
+  color: #fff; letter-spacing: 0.01em;
+  margin-bottom: 0.25rem;
+}
+.card-desc {
+  font-size: 0.8rem; color: var(--muted);
+  line-height: 1.5;
+}
+
+/* form */
+.lbl {
+  display: block;
+  font-size: 0.6rem; font-weight: 800;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 0.4rem;
+}
+.field { position: relative; margin-bottom: 1rem; }
+.field-row {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 0.4rem;
+}
+.field-row .lbl { margin: 0; }
+.forgot {
+  font-size: 0.6rem; font-weight: 800;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--cyan); text-decoration: none;
+  transition: opacity .2s;
+}
+.forgot:hover { opacity: 0.6; }
+.ico {
+  position: absolute; left: 0.88rem; top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255,255,255,0.25);
+  pointer-events: none; display: flex;
+}
+input {
+  width: 100%;
+  background: rgba(255,255,255,0.045);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 11px;
+  padding: 0.74rem 0.9rem 0.74rem 2.45rem;
+  color: #fff; font-size: 0.9rem;
+  font-family: inherit; font-weight: 600;
+  outline: none;
+  transition: border-color .22s, box-shadow .22s, background .22s;
+}
+input::placeholder { color: rgba(255,255,255,0.2); font-weight: 500; }
+input:focus {
+  border-color: var(--cyan);
+  background: rgba(41,217,194,0.04);
+  box-shadow: 0 0 0 3px rgba(41,217,194,0.12);
+}
+
+/* sign-in btn */
+.btn {
+  width: 100%; margin-top: 0.2rem;
+  padding: 0.86rem;
+  background: linear-gradient(135deg, #38b6ff, #005ecc);
+  border: none; border-radius: 12px;
+  color: #fff; font-family: inherit;
+  font-size: 0.95rem; font-weight: 900;
+  letter-spacing: 0.04em; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 0.45rem;
+  box-shadow: 0 5px 22px rgba(0,90,220,0.45);
+  transition: transform .15s, filter .15s, box-shadow .15s;
+  position: relative; overflow: hidden;
+}
+.btn::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.14), transparent);
+  opacity: 0; transition: opacity .2s;
+}
+.btn:hover { transform: translateY(-1px); filter: brightness(1.1); box-shadow: 0 8px 28px rgba(0,90,220,0.6); }
+.btn:hover::after { opacity: 1; }
+.btn:active { transform: none; }
+
+/* social login */
+.social-row {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 0.65rem; margin-top: 0.75rem;
+}
+.social-btn {
+  display: flex; align-items: center; justify-content: center; gap: 0.45rem;
+  padding: 0.62rem;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  color: rgba(255,255,255,0.65);
+  font-family: inherit; font-size: 0.78rem; font-weight: 700;
+  cursor: pointer;
+  transition: background .2s, border-color .2s, color .2s;
+}
+.social-btn:hover {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.2);
+  color: #fff;
+}
+
+/* signup */
+.signup {
+  text-align: center; margin-top: 1.2rem;
+  font-size: 0.8rem; color: var(--muted); font-weight: 600;
+}
+.signup a {
+  color: var(--cyan); text-decoration: none; font-weight: 800; margin-left: 0.2rem;
+  transition: opacity .2s;
+}
+.signup a:hover { opacity: 0.65; }
+
+/* ─── TAGLINE below card ─── */
+.tagline {
+  margin-top: 1.5rem;
+  text-align: center;
+  font-size: 0.78rem; color: rgba(255,255,255,0.2);
+  font-weight: 600; letter-spacing: 0.04em;
+}
+</style>
+</head>
+<body>
+
+<div class="bg"></div>
+<div class="bubbles" id="bubbles"></div>
+
+<!-- Top bar: brand + lang switcher -->
+<div class="topbar">
+  <div class="brand-row">
+    <div class="brand-icon">
+      <svg width="20" height="20" viewBox="0 0 22 22" fill="none">
+        <path d="M11 3L18 7.5V14.5L11 19L4 14.5V7.5L11 3Z" stroke="white" stroke-width="1.5"/>
+        <circle cx="11" cy="11" r="2.5" fill="white"/>
+      </svg>
+    </div>
+    <span class="brand-name">HomeClaw</span>
+  </div>
+
+  <div class="lang-switcher">
+    <button class="lang-btn active" data-lang="en">EN</button>
+    <button class="lang-btn" data-lang="zh">中文</button>
+    <button class="lang-btn" data-lang="ja">日本語</button>
+    <button class="lang-btn" data-lang="ko">한국어</button>
+  </div>
+</div>
+
+<!-- Main centered content -->
+<div class="page">
+
+  <!-- Cute cartoon lobster mascot -->
+  <div class="mascot-wrap">
+    <svg width="200" height="218" viewBox="0 0 260 285" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="bG" cx="42%" cy="35%" r="62%">
+          <stop offset="0%"   stop-color="#f55040"/>
+          <stop offset="55%"  stop-color="#d42e1e"/>
+          <stop offset="100%" stop-color="#9e1a10"/>
+        </radialGradient>
+        <radialGradient id="belG" cx="50%" cy="40%" r="55%">
+          <stop offset="0%"   stop-color="#f9856e"/>
+          <stop offset="100%" stop-color="#e04030"/>
+        </radialGradient>
+        <radialGradient id="cG" cx="38%" cy="32%" r="62%">
+          <stop offset="0%"   stop-color="#eb4a38"/>
+          <stop offset="100%" stop-color="#9e1a10"/>
+        </radialGradient>
+        <radialGradient id="ewG" cx="32%" cy="28%" r="68%">
+          <stop offset="0%"   stop-color="#ffffff"/>
+          <stop offset="100%" stop-color="#d8e8ff"/>
+        </radialGradient>
+        <filter id="ss">
+          <feDropShadow dx="0" dy="4" stdDeviation="7" flood-color="rgba(0,0,0,0.38)"/>
+        </filter>
+      </defs>
+      <ellipse cx="130" cy="274" rx="65" ry="9" fill="rgba(0,0,0,0.35)"/>
+      <!-- claws -->
+      <path d="M76 138 Q52 128 44 114" stroke="#b82218" stroke-width="13" stroke-linecap="round" fill="none"/>
+      <ellipse cx="37" cy="103" rx="21" ry="15" fill="url(#cG)" filter="url(#ss)"/>
+      <ellipse cx="37" cy="103" rx="13" ry="9" fill="rgba(255,255,255,0.07)"/>
+      <path d="M37 93 Q29 98 24 104" stroke="#8a1410" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+      <path d="M37 93 Q45 98 50 104" stroke="#8a1410" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+      <ellipse cx="31" cy="97" rx="5.5" ry="3.5" fill="rgba(255,255,255,0.24)" transform="rotate(-18 31 97)"/>
+      <path d="M184 138 Q208 128 216 114" stroke="#b82218" stroke-width="13" stroke-linecap="round" fill="none"/>
+      <ellipse cx="223" cy="103" rx="21" ry="15" fill="url(#cG)" filter="url(#ss)"/>
+      <ellipse cx="223" cy="103" rx="13" ry="9" fill="rgba(255,255,255,0.07)"/>
+      <path d="M223 93 Q215 98 210 104" stroke="#8a1410" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+      <path d="M223 93 Q231 98 236 104" stroke="#8a1410" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+      <ellipse cx="217" cy="97" rx="5.5" ry="3.5" fill="rgba(255,255,255,0.24)" transform="rotate(18 217 97)"/>
+      <!-- legs -->
+      <path d="M87 177 Q67 188 56 203" stroke="#b82218" stroke-width="7" stroke-linecap="round" fill="none"/>
+      <path d="M80 194 Q61 207 52 224" stroke="#b82218" stroke-width="6" stroke-linecap="round" fill="none"/>
+      <path d="M84 210 Q68 224 64 242" stroke="#b82218" stroke-width="5" stroke-linecap="round" fill="none"/>
+      <path d="M173 177 Q193 188 204 203" stroke="#b82218" stroke-width="7" stroke-linecap="round" fill="none"/>
+      <path d="M180 194 Q199 207 208 224" stroke="#b82218" stroke-width="6" stroke-linecap="round" fill="none"/>
+      <path d="M176 210 Q192 224 196 242" stroke="#b82218" stroke-width="5" stroke-linecap="round" fill="none"/>
+      <!-- tail -->
+      <path d="M107 244 Q102 264 98 274 Q114 267 130 269 Q146 267 162 274 Q158 264 153 244Z" fill="url(#bG)" filter="url(#ss)"/>
+      <path d="M116 247 Q112 267 108 274" stroke="#8a1410" stroke-width="1.5" stroke-linecap="round" opacity="0.55"/>
+      <path d="M130 247 Q130 267 130 275" stroke="#8a1410" stroke-width="1.5" stroke-linecap="round" opacity="0.55"/>
+      <path d="M144 247 Q148 267 152 274" stroke="#8a1410" stroke-width="1.5" stroke-linecap="round" opacity="0.55"/>
+      <!-- body -->
+      <ellipse cx="130" cy="185" rx="62" ry="65" fill="url(#bG)" filter="url(#ss)"/>
+      <ellipse cx="130" cy="200" rx="38" ry="42" fill="url(#belG)" opacity="0.5"/>
+      <ellipse cx="108" cy="153" rx="20" ry="13" fill="rgba(255,255,255,0.14)" transform="rotate(-22 108 153)"/>
+      <path d="M93 210 Q130 203 167 210" stroke="rgba(0,0,0,0.16)" stroke-width="1.8" fill="none"/>
+      <path d="M95 228 Q130 221 165 228" stroke="rgba(0,0,0,0.11)" stroke-width="1.4" fill="none"/>
+      <!-- head -->
+      <ellipse cx="130" cy="132" rx="56" ry="52" fill="url(#bG)" filter="url(#ss)"/>
+      <ellipse cx="110" cy="103" rx="22" ry="14" fill="rgba(255,255,255,0.15)" transform="rotate(-24 110 103)"/>
+      <!-- antennae -->
+      <path d="M110 88 Q93 62 82 38" stroke="#c82818" stroke-width="3.5" stroke-linecap="round"/>
+      <circle cx="80" cy="34" r="5" fill="#e84030"/><circle cx="80" cy="34" r="2.5" fill="#ff9888"/>
+      <path d="M150 88 Q167 62 178 38" stroke="#c82818" stroke-width="3.5" stroke-linecap="round"/>
+      <circle cx="180" cy="34" r="5" fill="#e84030"/><circle cx="180" cy="34" r="2.5" fill="#ff9888"/>
+      <!-- eyes -->
+      <circle cx="108" cy="120" r="17" fill="url(#ewG)" filter="url(#ss)"/>
+      <circle cx="110" cy="122" r="9.5" fill="#140808"/>
+      <circle cx="110" cy="122" r="5.5" fill="#22186a"/>
+      <circle cx="105" cy="116" r="3.8" fill="rgba(255,255,255,0.92)"/>
+      <circle cx="113" cy="125" r="1.4" fill="rgba(255,255,255,0.5)"/>
+      <circle cx="152" cy="120" r="17" fill="url(#ewG)" filter="url(#ss)"/>
+      <circle cx="150" cy="122" r="9.5" fill="#140808"/>
+      <circle cx="150" cy="122" r="5.5" fill="#22186a"/>
+      <circle cx="145" cy="116" r="3.8" fill="rgba(255,255,255,0.92)"/>
+      <circle cx="153" cy="125" r="1.4" fill="rgba(255,255,255,0.5)"/>
+      <!-- smile -->
+      <path d="M116 143 Q130 155 144 143" stroke="#6e1010" stroke-width="3" stroke-linecap="round" fill="none"/>
+      <!-- blush -->
+      <ellipse cx="95"  cy="140" rx="10" ry="6.5" fill="rgba(255,120,100,0.28)"/>
+      <ellipse cx="165" cy="140" rx="10" ry="6.5" fill="rgba(255,120,100,0.28)"/>
+      <!-- small antennules -->
+      <path d="M120 90 Q114 76 111 68" stroke="#e04030" stroke-width="2" stroke-linecap="round"/>
+      <path d="M140 90 Q146 76 149 68" stroke="#e04030" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+  </div>
+
+  <!-- Login card -->
+  <div class="card">
+    <div class="card-headline">
+      <div class="card-title" data-i18n="title">LinknLink Login</div>
+      <div class="card-desc" data-i18n="desc">Sign in to get free tokens and activate more services</div>
+    </div>
+
+    <label class="lbl" data-i18n="id_label">Authentication ID</label>
+    <div class="field">
+      <span class="ico">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+      </span>
+      <input id="inp-email" type="email" data-i18n-ph="id_placeholder" placeholder="user@sentient.home"/>
+    </div>
+
+    <div class="field-row">
+      <label class="lbl" data-i18n="key_label">Access Key</label>
+      <a class="forgot" href="#" data-i18n="forgot">Forgot password?</a>
+    </div>
+    <div class="field">
+      <span class="ico">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round">
+          <rect x="3" y="11" width="18" height="11" rx="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+      </span>
+      <input id="inp-pass" type="password" placeholder="••••••••••••"/>
+    </div>
+
+    <div style="display: flex; gap: 0.8rem; margin-top: 0.2rem;">
+      <button class="btn" id="btn-signin" style="margin-top:0; flex:1;"><span data-i18n="signin">Sign In</span></button>
+      <button class="btn" id="btn-skip" style="margin-top:0; flex:1; background: rgba(255,255,255,0.06); box-shadow: none; color: var(--text); border: 1px solid rgba(255,255,255,0.1);"><span data-i18n="skip">Skip</span></button>
+    </div>
+
+
+    <div class="signup"><span data-i18n="no_account">Don't have an account?</span><a href="#" data-i18n="signup"> Sign Up</a></div>
+  </div>
+
+  <div class="tagline" data-i18n="tagline">Your home gets smarter every day 🦞</div>
+</div>
+
+<script>
+// ─── i18n data ───
+const i18n = {
+  en: {
+    title: 'LinknLink Login',
+    desc: 'Sign in to get free tokens and activate more services',
+    id_label: 'Authentication ID',
+    id_placeholder: 'user@sentient.home',
+    key_label: 'Access Key',
+    forgot: 'Forgot password?',
+    signin: 'Sign In',
+    or: 'or continue with',
+    no_account: "Don't have an account?",
+    signup: ' Sign Up',
+    tagline: 'Your home gets smarter every day 🦞',
+    skip: 'Skip',
+  },
+  zh: {
+    title: 'LinknLink 登录',
+    desc: '登录后获取免费 token 和激活更多服务',
+    id_label: '认证 ID',
+    id_placeholder: 'user@sentient.home',
+    key_label: '访问密钥',
+    forgot: '忘记密码？',
+    signin: '登 录',
+    or: '或通过以下方式继续',
+    no_account: '还没有账号？',
+    signup: ' 立即注册',
+    tagline: '让你的家每天更智能 🦞',
+    skip: '跳过',
+  },
+  ja: {
+    title: 'LinknLink ログイン',
+    desc: 'ログインして無料トークンを取得し、より多くのサービスを有効化',
+    id_label: '認証 ID',
+    id_placeholder: 'user@sentient.home',
+    key_label: 'アクセスキー',
+    forgot: 'パスワードを忘れた方',
+    signin: 'ログイン',
+    or: 'または以下で続ける',
+    no_account: 'アカウントをお持ちでない方は',
+    signup: ' 新規登録',
+    tagline: 'あなたの家が毎日賢くなる 🦞',
+    skip: 'スキップ',
+  },
+  ko: {
+    title: 'LinknLink 로그인',
+    desc: '로그인하여 무료 토큰을 받고 더 많은 서비스를 활성화하세요',
+    id_label: '인증 ID',
+    id_placeholder: 'user@sentient.home',
+    key_label: '액세스 키',
+    forgot: '비밀번호 찾기',
+    signin: '로그인',
+    or: '또는 다음으로 계속',
+    no_account: '계정이 없으신가요?',
+    signup: ' 회원가입',
+    tagline: '집이 매일 더 스마트해집니다 🦞',
+    skip: '건너뛰기',
+  },
+};
+
+function applyLang(code) {
+  const t = i18n[code] || i18n.en;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    if (t[key] !== undefined) el.textContent = t[key];
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+    const key = el.dataset.i18nPh;
+    if (t[key] !== undefined) el.placeholder = t[key];
+  });
+  document.documentElement.lang = code;
+}
+
+// lang buttons
+document.querySelectorAll('.lang-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    applyLang(btn.dataset.lang);
+    localStorage.setItem('homeclaw_lang', btn.dataset.lang);
+  });
+});
+
+
+document.getElementById('btn-skip').addEventListener('click', (e) => {
+  e.preventDefault();
+  localStorage.setItem('isLoggedIn', 'false');
+  window.location.href = 'home.html';
+});
+document.getElementById('btn-signin').addEventListener('click', (e) => {
+  e.preventDefault();
+  localStorage.setItem('isLoggedIn', 'true');
+  window.location.href = 'home.html';
+});
+
+// init
+const savedLang = localStorage.getItem('homeclaw_lang') || 'en';
+document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+const activeBtn = document.querySelector(`.lang-btn[data-lang="${savedLang}"]`);
+if (activeBtn) activeBtn.classList.add('active');
+applyLang(savedLang);
+
+// bubbles
+const bc = document.getElementById('bubbles');
+for (let i = 0; i < 14; i++) {
+  const b = document.createElement('div');
+  b.className = 'bubble';
+  const s = 16 + Math.random() * 55;
+  b.style.cssText = `width:${s}px;height:${s}px;left:${Math.random()*100}%;bottom:-${s}px;animation-duration:${10+Math.random()*15}s;animation-delay:${Math.random()*15}s;`;
+  bc.appendChild(b);
+}
+</script>
+</body>
+</html>
