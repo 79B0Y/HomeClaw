@@ -557,6 +557,121 @@ func uninstallLoading() {
 }
 
 // ============================================================
+// dashboard 服务安装
+// ============================================================
+
+const (
+	dashboardBinPath     = "/usr/local/bin/dashboard"
+	dashboardInstallDir  = "/usr/local/share/homeclaw/dashboard"
+	dashboardServicePath = "/etc/systemd/system/dashboard.service"
+)
+
+const dashboardServiceUnit = `[Unit]
+Description=HomeClaw Dashboard
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/usr/local/share/homeclaw/dashboard
+ExecStart=/usr/local/bin/dashboard
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
+`
+
+// installDashboard 将 dashboard 可执行文件和 HTML 资源部署到系统目录，
+// 注册并启用 systemd 服务，使其在 ARM64 Linux 上可以开机自启。
+func installDashboard() error {
+	logf(lvlInfo, "===== 安装 Dashboard 服务 =====")
+
+	// 在 homeclaw-mgr 同级或上级目录中寻找 dashboard 可执行文件
+	selfPath, err := os.Executable()
+	if err != nil {
+		return fmt.Errorf("获取当前可执行路径失败: %w", err)
+	}
+	selfDir := filepath.Dir(selfPath)
+
+	candidates := []string{
+		filepath.Join(selfDir, "..", "dashboard", "dashboard-service"),
+		filepath.Join(selfDir, "..", "dashboard", "dashboard-linux-arm64"),
+		filepath.Join(selfDir, "dashboard-service"),
+		filepath.Join(selfDir, "dashboard-linux-arm64"),
+	}
+	dashboardSrc := ""
+	for _, c := range candidates {
+		if _, err := os.Stat(c); err == nil {
+			dashboardSrc = c
+			break
+		}
+	}
+	if dashboardSrc == "" {
+		return fmt.Errorf("未找到 dashboard 可执行文件（已查找路径：%s/../dashboard/）", selfDir)
+	}
+	logf(lvlInfo, "找到 dashboard 可执行文件：%s", dashboardSrc)
+
+	// 创建安装目录
+	if err := os.MkdirAll(dashboardInstallDir, 0755); err != nil {
+		return fmt.Errorf("创建安装目录失败: %w", err)
+	}
+
+	// 复制可执行文件
+	srcData, err := os.ReadFile(dashboardSrc)
+	if err != nil {
+		return fmt.Errorf("读取 dashboard 二进制失败: %w", err)
+	}
+	if err := os.WriteFile(dashboardBinPath, srcData, 0755); err != nil {
+		return fmt.Errorf("写入 dashboard 二进制失败: %w", err)
+	}
+	logf(lvlInfo, "dashboard 已安装至：%s", dashboardBinPath)
+
+	// 复制 HTML 资源文件
+	dashboardSrcDir := filepath.Join(selfDir, "..", "dashboard")
+	htmlFiles := []string{"home.html", "login.html", "billing.html", "topup.html", "usage.html"}
+	for _, html := range htmlFiles {
+		srcFile := filepath.Join(dashboardSrcDir, html)
+		if data, err := os.ReadFile(srcFile); err == nil {
+			dest := filepath.Join(dashboardInstallDir, html)
+			if err2 := os.WriteFile(dest, data, 0644); err2 == nil {
+				logf(lvlInfo, "已复制：%s → %s", html, dest)
+			}
+		}
+	}
+
+	// 写入 systemd 服务文件
+	if err := os.WriteFile(dashboardServicePath, []byte(dashboardServiceUnit), 0644); err != nil {
+		return fmt.Errorf("写入 dashboard.service 失败: %w", err)
+	}
+	logf(lvlInfo, "dashboard.service 已写入：%s", dashboardServicePath)
+
+	// 重载 systemd 并启用+启动服务
+	runQuiet("systemctl", "daemon-reload")
+	if err := runQuiet("systemctl", "enable", "--now", "dashboard.service"); err != nil {
+		return fmt.Errorf("启用 dashboard.service 失败: %w", err)
+	}
+
+	logf(lvlSuccess, "Dashboard 服务安装完成（端口 9090，开机自启已启用）")
+	return nil
+}
+
+// uninstallDashboard 停止并卸载 dashboard 服务，删除相关文件。
+func uninstallDashboard() {
+	logf(lvlInfo, "===== 卸载 Dashboard 服务 =====")
+	runQuiet("systemctl", "stop", "dashboard.service")
+	runQuiet("systemctl", "disable", "dashboard.service")
+	for _, path := range []string{dashboardServicePath, dashboardBinPath} {
+		if _, err := os.Stat(path); err == nil {
+			os.Remove(path)
+			logf(lvlInfo, "已删除：%s", path)
+		}
+	}
+	os.RemoveAll(dashboardInstallDir)
+	runQuiet("systemctl", "daemon-reload")
+	logf(lvlSuccess, "Dashboard 服务已卸载")
+}
+
+// ============================================================
 // install 子命令
 // ============================================================
 
@@ -829,12 +944,17 @@ func cmdInstall(args []string) {
 		os.Exit(1)
 	}
 
-	logf(lvlInfo, "步骤 6/7：安装 Loading 启动画面服务...")
+	logf(lvlInfo, "步骤 6/8：安装 Loading 启动画面服务...")
 	if err := installLoading(); err != nil {
 		logf(lvlWarn, "Loading 安装失败（非致命）：%v", err)
 	}
 
-	logf(lvlInfo, "步骤 7/7：加载本地镜像...")
+	logf(lvlInfo, "步骤 7/8：安装 Dashboard 服务（ARM64 开机自启）...")
+	if err := installDashboard(); err != nil {
+		logf(lvlWarn, "Dashboard 安装失败（非致命）：%v", err)
+	}
+
+	logf(lvlInfo, "步骤 8/8：加载本地镜像...")
 	switch {
 	case *imageFile != "":
 		loadSingleImage(*imageFile)
@@ -853,6 +973,11 @@ func cmdInstall(args []string) {
 		loadingStatus = "已安装"
 	}
 	logf(lvlSuccess, "   Loading 服务:   %s", loadingStatus)
+	dashboardStatus := "未安装"
+	if _, err := os.Stat(dashboardBinPath); err == nil {
+		dashboardStatus = "已安装（端口 9090）"
+	}
+	logf(lvlSuccess, "   Dashboard 服务: %s", dashboardStatus)
 	logf(lvlSuccess, "==========================================")
 }
 
